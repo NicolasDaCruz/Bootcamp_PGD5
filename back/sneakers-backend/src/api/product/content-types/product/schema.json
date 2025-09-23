@@ -1,0 +1,115 @@
+{
+  "kind": "collectionType",
+  "collectionName": "products",
+  "info": {
+    "singularName": "product",
+    "pluralName": "products",
+    "displayName": "product"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "description": {
+      "type": "blocks"
+    },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "original_price": {
+      "type": "decimal"
+    },
+    "brand": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::brand.brand",
+      "inversedBy": "products"
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "hommes",
+        "femmes",
+        "enfants"
+      ]
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "running",
+        "basketball",
+        "lifestyle",
+        "skateboard",
+        "limited"
+      ]
+    },
+    "color": {
+      "type": "string"
+    },
+    "release_date": {
+      "type": "date"
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "statut": {
+      "type": "enumeration",
+      "default": "active",
+      "enum": [
+        "active",
+        "inactive",
+        "coming_soon"
+      ]
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "sku": {
+      "type": "string",
+      "unique": true
+    },
+    "material": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "decimal",
+      "min": 0,
+      "max": 5
+    },
+    "review_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "stocks": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::stock.stock",
+      "mappedBy": "product"
+    },
+    "reviews": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::review.review",
+      "mappedBy": "product"
+    }
+  }
+}
