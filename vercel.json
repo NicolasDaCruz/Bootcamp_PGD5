@@ -1,0 +1,102 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm ci",
+  "framework": "nextjs",
+  "regions": ["fra1", "iad1"],
+  "crons": [
+    {
+      "path": "/api/cron/cleanup-reservations",
+      "schedule": "*/5 * * * *"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "@next_public_stripe_publishable_key",
+    "NEXT_PUBLIC_KICKSDB_API_KEY": "@next_public_kicksdb_api_key",
+    "NEXT_PUBLIC_GOOGLE_ANALYTICS_ID": "@next_public_google_analytics_id",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "STRIPE_SECRET_KEY": "@stripe_secret_key",
+    "STRIPE_WEBHOOK_SECRET": "@stripe_webhook_secret",
+    "RESEND_API_KEY": "@resend_api_key",
+    "SENTRY_DSN": "@sentry_dsn",
+    "SENTRY_AUTH_TOKEN": "@sentry_auth_token",
+    "CRON_SECRET": "@cron_secret"
+  },
+  "functions": {
+    "src/pages/api/**/*.js": {
+      "maxDuration": 30
+    },
+    "src/pages/api/webhooks/**/*.js": {
+      "maxDuration": 60
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "/admin/dashboard",
+      "permanent": false
+    },
+    {
+      "source": "/vendor",
+      "destination": "/vendor/dashboard",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/api/robots"
+    }
+  ]
+}

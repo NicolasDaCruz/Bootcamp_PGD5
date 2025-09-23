@@ -1,0 +1,81 @@
+-- Database Schema Export Script
+-- This script exports all table schemas from the public schema
+-- Generated on: 2025-09-21
+
+-- Export all table structures
+-- Note: This is meant to be run via pg_dump externally
+-- Usage: pg_dump -h [HOST] -U [USER] -d [DATABASE] --schema-only --no-owner --no-privileges > schemas/schema-backup.sql
+
+-- For manual inspection, here are the tables in the database:
+/*
+Tables in public schema:
+- abandoned_carts
+- active_reservations
+- active_stock_alerts
+- automated_responses
+- brand_sustainability_scorecards
+- cart_items
+- cart_recovery_links
+- categories
+- chat_messages
+- chat_sessions
+- discount_codes
+- eco_certifications
+- environmental_impact
+- faq_categories
+- faq_items
+- guest_checkouts
+- import_summary
+- loyalty_programs
+- loyalty_rewards
+- loyalty_tiers
+- loyalty_transactions
+- notification_log
+- notification_preferences
+- order_analytics
+- order_items
+- order_notifications
+- order_status_history
+- order_tracking_summary
+- order_tracking_updates
+- orders
+- packaging_options
+- product_condition_assessments
+- product_eco_certifications
+- product_images
+- product_inventory
+- product_maintenance_guides
+- product_variants
+- products
+- recommendation_analytics
+- recommendation_cache
+- recommendation_metrics
+- recycling_programs
+- recycling_submissions
+- review_helpful_votes
+- review_moderation_log
+- review_photos
+- reviews
+- saved_items
+- shipping_carriers
+- shipping_rates
+- sneaker_products_view (view)
+- sneakers
+- stock_alerts
+- stock_levels
+- stock_movement_audit
+- stock_movements
+- stock_reservations
+- support_ticket_messages
+- support_tickets
+- user_behavior
+- user_loyalty_points
+- user_packaging_preferences
+- user_product_affinity
+- user_recycling_enrollments
+- user_reward_redemptions
+- users
+- wishlist_items
+- wishlist_shares
+- wishlists
+*/

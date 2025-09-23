@@ -1,0 +1,37 @@
+# Task ID: 18
+# Title: Test migration scripts in development
+# Status: pending
+# Dependencies: 17
+# Priority: high
+# Description: Thoroughly test all migration scripts
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Create test database [pending]
+### Dependencies: None
+### Description: Clone production for testing
+### Details:
+
+
+## 2. Run migration scripts [pending]
+### Dependencies: None
+### Description: Execute all migrations
+### Details:
+
+
+## 3. Test rollback procedures [pending]
+### Dependencies: None
+### Description: Verify we can undo changes
+### Details:
+
+
+## 4. Performance testing [pending]
+### Dependencies: None
+### Description: Ensure no performance degradation
+### Details:
+
+

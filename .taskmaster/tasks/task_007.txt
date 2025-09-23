@@ -1,0 +1,37 @@
+# Task ID: 7
+# Title: Create migration script for users table
+# Status: done
+# Dependencies: 5
+# Priority: high
+# Description: SQL migration to update users table structure
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Write ALTER TABLE statements [done]
+### Dependencies: None
+### Description: Add new columns to users table
+### Details:
+
+
+## 2. Create data migration logic [done]
+### Dependencies: None
+### Description: Handle existing user data transformation
+### Details:
+
+
+## 3. Add default values [done]
+### Dependencies: None
+### Description: Set defaults for new columns
+### Details:
+
+
+## 4. Create rollback script [done]
+### Dependencies: None
+### Description: Script to revert changes if needed
+### Details:
+
+

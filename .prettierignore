@@ -1,0 +1,8 @@
+.next
+.vercel
+node_modules
+coverage
+*.min.js
+*.min.css
+public/sw.js
+public/workbox-*.js

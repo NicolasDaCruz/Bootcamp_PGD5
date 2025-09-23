@@ -1,0 +1,37 @@
+# Task ID: 13
+# Title: Implement Row Level Security policies
+# Status: pending
+# Dependencies: 11
+# Priority: high
+# Description: Create RLS policies for all tables
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Enable RLS on all tables [pending]
+### Dependencies: None
+### Description: Turn on row level security
+### Details:
+
+
+## 2. Create user access policies [pending]
+### Dependencies: None
+### Description: Define what users can see/modify
+### Details:
+
+
+## 3. Create vendor policies [pending]
+### Dependencies: None
+### Description: Vendor-specific data access
+### Details:
+
+
+## 4. Test security boundaries [pending]
+### Dependencies: None
+### Description: Verify policies work correctly
+### Details:
+
+

@@ -1,0 +1,37 @@
+# Task ID: 15
+# Title: Update API integration for new schema
+# Status: pending
+# Dependencies: 13, 14
+# Priority: high
+# Description: Modify all API calls to use new structure
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Update Supabase client queries [pending]
+### Dependencies: None
+### Description: Modify all database queries
+### Details:
+
+
+## 2. Fix type definitions [pending]
+### Dependencies: None
+### Description: Update TypeScript types
+### Details:
+
+
+## 3. Add error handling [pending]
+### Dependencies: None
+### Description: Handle migration edge cases
+### Details:
+
+
+## 4. Implement retry logic [pending]
+### Dependencies: None
+### Description: Add resilience to API calls
+### Details:
+
+

@@ -1,0 +1,37 @@
+# Task ID: 4
+# Title: Design new products table for KicksDB API
+# Status: done
+# Dependencies: 3
+# Priority: high
+# Description: Create schema for products table to store KicksDB data
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Define products table columns [done]
+### Dependencies: None
+### Description: Create column list with proper data types for KicksDB data
+### Details:
+
+
+## 2. Add stock tracking columns [done]
+### Dependencies: None
+### Description: Include quantity, reserved, available columns
+### Details:
+
+
+## 3. Design variant support [done]
+### Dependencies: None
+### Description: Structure for size, color variants
+### Details:
+
+
+## 4. Add metadata columns [done]
+### Dependencies: None
+### Description: Include timestamps, source, sync status
+### Details:
+
+

@@ -1,0 +1,37 @@
+# Task ID: 24
+# Title: Perform post-migration optimization
+# Status: pending
+# Dependencies: 23
+# Priority: low
+# Description: Optimize the new system
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Analyze query performance [pending]
+### Dependencies: None
+### Description: Find slow queries
+### Details:
+
+
+## 2. Optimize indexes [pending]
+### Dependencies: None
+### Description: Fine-tune index strategy
+### Details:
+
+
+## 3. Update statistics [pending]
+### Dependencies: None
+### Description: Help query planner
+### Details:
+
+
+## 4. Review configuration [pending]
+### Dependencies: None
+### Description: Optimize database settings
+### Details:
+
+

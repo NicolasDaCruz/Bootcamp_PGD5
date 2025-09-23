@@ -1,0 +1,37 @@
+# Task ID: 16
+# Title: Update frontend components for new schema
+# Status: pending
+# Dependencies: 15
+# Priority: high
+# Description: Modify React components to work with new data
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Update product components [pending]
+### Dependencies: None
+### Description: Use new products table structure
+### Details:
+
+
+## 2. Fix user components [pending]
+### Dependencies: None
+### Description: Handle vendor fields
+### Details:
+
+
+## 3. Update stock displays [pending]
+### Dependencies: None
+### Description: Show real-time stock levels
+### Details:
+
+
+## 4. Fix form validations [pending]
+### Dependencies: None
+### Description: Align with new constraints
+### Details:
+
+

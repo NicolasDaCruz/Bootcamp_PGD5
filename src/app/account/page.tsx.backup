@@ -1,0 +1,595 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  User,
+  Settings,
+  ShoppingBag,
+  Heart,
+  Package,
+  TrendingUp,
+  Users,
+  LogOut,
+  Edit,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  CreditCard,
+  Star,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  DollarSign
+} from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+interface UserData {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'client' | 'vendeur' | 'admin';
+  created_at: string;
+}
+
+interface Order {
+  id: string;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  order_items: {
+    quantity: number;
+    price: number;
+    product: {
+      name: string;
+      brand: string;
+    };
+  }[];
+}
+
+export default function AccountPage() {
+  const [user, setUser] = useState<UserData | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Check authentication
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !authUser) {
+          router.push('/login');
+          return;
+        }
+
+        // Fetch user profile
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+
+        if (userError) {
+          console.error('Error fetching user data:', userError);
+          return;
+        }
+
+        setUser(userData);
+
+        // Fetch orders if client
+        if (userData.role === 'client') {
+          const { data: ordersData, error: ordersError } = await supabase
+            .from('orders')
+            .select(`
+              id,
+              total_amount,
+              status,
+              created_at,
+              order_items (
+                quantity,
+                price,
+                product:product_id (
+                  name,
+                  brand
+                )
+              )
+            `)
+            .eq('user_id', authUser.id)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+          if (!ordersError) {
+            setOrders(ordersData || []);
+          }
+        }
+      } catch (error) {
+        console.error('Error in fetchUserData:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [router]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+      case 'delivered':
+        return 'text-green-600 bg-green-100';
+      case 'processing':
+      case 'confirmed':
+        return 'text-blue-600 bg-blue-100';
+      case 'shipped':
+        return 'text-purple-600 bg-purple-100';
+      case 'cancelled':
+        return 'text-red-600 bg-red-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+      case 'delivered':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'processing':
+      case 'confirmed':
+        return <Clock className="w-4 h-4" />;
+      case 'cancelled':
+        return <AlertCircle className="w-4 h-4" />;
+      default:
+        return <Package className="w-4 h-4" />;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-300">Loading your account...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Access Denied</h1>
+          <p className="text-slate-600 dark:text-slate-300 mb-6">Please log in to access your account.</p>
+          <Link
+            href="/login"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }
+    }
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'A';
+      case 'vendeur':
+        return 'V';
+      default:
+        return 'U';
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'from-purple-600 to-indigo-600';
+      case 'vendeur':
+        return 'from-green-600 to-emerald-600';
+      default:
+        return 'from-blue-600 to-cyan-600';
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'Administrator';
+      case 'vendeur':
+        return 'Vendor';
+      default:
+        return 'Customer';
+    }
+  };
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: User },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag, visible: user.role === 'client' },
+    { id: 'wishlist', label: 'Wishlist', icon: Heart, visible: user.role === 'client' },
+    { id: 'products', label: 'My Products', icon: Package, visible: user.role === 'vendeur' },
+    { id: 'analytics', label: 'Analytics', icon: TrendingUp, visible: user.role === 'admin' || user.role === 'vendeur' },
+    { id: 'users', label: 'Users', icon: Users, visible: user.role === 'admin' },
+    { id: 'settings', label: 'Settings', icon: Settings }
+  ].filter(tab => tab.visible !== false);
+
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 pt-20 pb-12 px-6"
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-2">
+                My Account
+              </h1>
+              <p className="text-slate-600 dark:text-slate-300">
+                Manage your account and preferences
+              </p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            >
+              <LogOut className="w-5 h-5 mr-2" />
+              Sign Out
+            </button>
+          </div>
+
+          {/* User Info Card */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+            <div className="flex items-center space-x-4">
+              <div className={`w-16 h-16 bg-gradient-to-r ${getRoleColor(user.role)} rounded-2xl flex items-center justify-center text-2xl`}>
+                {getRoleIcon(user.role)}
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {user.full_name || 'User'}
+                </h2>
+                <p className="text-slate-600 dark:text-slate-400">{user.email}</p>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r ${getRoleColor(user.role)} text-white mt-2`}>
+                  {getRoleLabel(user.role)}
+                </span>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-slate-500 dark:text-slate-400">Member since</p>
+                <p className="font-medium text-slate-900 dark:text-white">
+                  {new Date(user.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="mb-8">
+          <div className="flex space-x-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="space-y-6">
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Quick Stats */}
+              {user.role === 'client' && (
+                <>
+                  <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Total Orders</h3>
+                      <ShoppingBag className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white">{orders.length}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Lifetime orders</p>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Total Spent</h3>
+                      <DollarSign className="w-6 h-6 text-green-600" />
+                    </div>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                      ${orders.reduce((sum, order) => sum + order.total_amount, 0).toFixed(2)}
+                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Lifetime spending</p>
+                  </div>
+                </>
+              )}
+
+              {/* Quick Actions */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h3>
+                <div className="space-y-3">
+                  {user.role === 'client' && (
+                    <>
+                      <Link
+                        href="/products"
+                        className="flex items-center p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <ShoppingBag className="w-5 h-5 text-blue-600 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300">Browse Products</span>
+                      </Link>
+                      <Link
+                        href="/orders"
+                        className="flex items-center p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <Package className="w-5 h-5 text-purple-600 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300">View Orders</span>
+                      </Link>
+                      <Link
+                        href="/wishlist"
+                        className="flex items-center p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <Heart className="w-5 h-5 text-red-600 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300">View Wishlist</span>
+                      </Link>
+                    </>
+                  )}
+                  {user.role === 'vendeur' && (
+                    <>
+                      <button className="flex items-center p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left">
+                        <Package className="w-5 h-5 text-green-600 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300">Add Product</span>
+                      </button>
+                      <button className="flex items-center p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left">
+                        <TrendingUp className="w-5 h-5 text-purple-600 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300">View Analytics</span>
+                      </button>
+                    </>
+                  )}
+                  {user.role === 'admin' && (
+                    <>
+                      <Link
+                        href="/admin"
+                        className="flex items-center p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <Users className="w-5 h-5 text-purple-600 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300">Admin Dashboard</span>
+                      </Link>
+                      <button className="flex items-center p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full text-left">
+                        <TrendingUp className="w-5 h-5 text-blue-600 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300">System Analytics</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'orders' && user.role === 'client' && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Recent Orders</h3>
+                <Link
+                  href="/orders"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  View All Orders
+                </Link>
+              </div>
+              {orders.length > 0 ? (
+                <div className="space-y-4">
+                  {orders.slice(0, 5).map((order) => (
+                    <div
+                      key={order.id}
+                      className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="font-semibold text-slate-900 dark:text-white">
+                            Order #{order.id.slice(0, 8)}
+                          </p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            {new Date(order.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                            {getStatusIcon(order.status)}
+                            <span className="ml-1 capitalize">{order.status}</span>
+                          </span>
+                          <p className="text-lg font-bold text-slate-900 dark:text-white mt-1">
+                            ${order.total_amount.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-sm text-slate-600 dark:text-slate-400">
+                        {order.order_items?.length > 0 && (
+                          <p>
+                            {order.order_items.length} item{order.order_items.length > 1 ? 's' : ''} -
+                            {order.order_items[0]?.product?.brand} {order.order_items[0]?.product?.name}
+                            {order.order_items.length > 1 && ` +${order.order_items.length - 1} more`}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <ShoppingBag className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                  <h4 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                    No orders yet
+                  </h4>
+                  <p className="text-slate-500 dark:text-slate-500 mb-6">
+                    Start shopping to see your orders here
+                  </p>
+                  <Link
+                    href="/products"
+                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Browse Products
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Account Settings</h3>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={user.full_name || ''}
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={user.email}
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Account Type
+                  </label>
+                  <input
+                    type="text"
+                    value={getRoleLabel(user.role)}
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-600 text-slate-900 dark:text-white"
+                    readOnly
+                  />
+                </div>
+                <div className="pt-4">
+                  <button className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Placeholder content for other tabs */}
+          {activeTab === 'wishlist' && user.role === 'client' && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+              <div className="text-center py-12">
+                <Heart className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                <h4 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                  Your wishlist is empty
+                </h4>
+                <p className="text-slate-500 dark:text-slate-500 mb-6">
+                  Save products you love to view them later
+                </p>
+                <Link
+                  href="/products"
+                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Browse Products
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'products' && user.role === 'vendeur' && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                <h4 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                  No products yet
+                </h4>
+                <p className="text-slate-500 dark:text-slate-500 mb-6">
+                  Start selling by adding your first product
+                </p>
+                <button className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                  Add Product
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'analytics' && (user.role === 'admin' || user.role === 'vendeur') && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+              <div className="text-center py-12">
+                <TrendingUp className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                <h4 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                  Analytics Dashboard
+                </h4>
+                <p className="text-slate-500 dark:text-slate-500">
+                  Coming soon - View your sales and performance metrics
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'users' && user.role === 'admin' && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+              <div className="text-center py-12">
+                <Users className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                <h4 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                  User Management
+                </h4>
+                <p className="text-slate-500 dark:text-slate-500 mb-6">
+                  Manage user accounts and permissions
+                </p>
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Go to Admin Panel
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}

@@ -1,0 +1,933 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create comprehensive database backup",
+        "description": "Backup all existing database tables and data before starting migration",
+        "status": "done",
+        "priority": "critical",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Export all table schemas",
+            "description": "Use pg_dump to export complete schema definitions",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Export all table data",
+            "description": "Create SQL dumps of all data in all tables",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Create JSON backup of critical data",
+            "description": "Export users, products, orders data as JSON",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Document backup locations and recovery procedures",
+            "description": "Create recovery documentation",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Analyze current database schema structure",
+        "description": "Complete analysis of existing database structure",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "List all tables and columns",
+            "description": "Document every table and its columns with data types",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Identify foreign key relationships",
+            "description": "Map all existing relationships between tables",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Analyze data volume per table",
+            "description": "Count records in each table for migration planning",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Identify orphaned data",
+            "description": "Find records with broken relationships",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Document existing data relationships",
+        "description": "Create comprehensive documentation of data flow",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "2"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create ER diagram",
+            "description": "Visual representation of current database",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Document business logic in relationships",
+            "description": "Explain why relationships exist",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Identify critical data paths",
+            "description": "Map essential data flows for business operations",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Design new products table for KicksDB API",
+        "description": "Create schema for products table to store KicksDB data",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "3"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define products table columns",
+            "description": "Create column list with proper data types for KicksDB data",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Add stock tracking columns",
+            "description": "Include quantity, reserved, available columns",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Design variant support",
+            "description": "Structure for size, color variants",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Add metadata columns",
+            "description": "Include timestamps, source, sync status",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Design enhanced users table with vendor support",
+        "description": "Update users table to support vendor functionality",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "3"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add vendor_id column",
+            "description": "Add vendor identifier with proper constraints",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Add vendor-specific fields",
+            "description": "Include vendor status, commission rate, etc.",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Design vendor permissions structure",
+            "description": "Create role-based vendor access control",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Add vendor analytics fields",
+            "description": "Track vendor performance metrics",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Design stock management tables structure",
+        "description": "Create comprehensive stock tracking system",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "4",
+          "5"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create stock_levels table",
+            "description": "Current stock quantities per product/variant",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Create stock_movements table",
+            "description": "Track all stock changes with reasons",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Create stock_reservations table",
+            "description": "Handle cart and order reservations",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Create stock_alerts table",
+            "description": "Low stock notifications system",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Create migration script for users table",
+        "description": "SQL migration to update users table structure",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "5"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Write ALTER TABLE statements",
+            "description": "Add new columns to users table",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Create data migration logic",
+            "description": "Handle existing user data transformation",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Add default values",
+            "description": "Set defaults for new columns",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Create rollback script",
+            "description": "Script to revert changes if needed",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Create migration script for products table",
+        "description": "SQL migration to create new products table",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "4"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Write CREATE TABLE statement",
+            "description": "Full products table creation SQL",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Import existing product data",
+            "description": "Migrate data from current tables",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Create constraints",
+            "description": "Add unique, check, and foreign key constraints",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Create initial indexes",
+            "description": "Add performance indexes",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Create migration script for sneakers table",
+        "description": "Update sneakers table to align with new structure",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "4"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add missing stock columns",
+            "description": "Add stock tracking fields to sneakers",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Align with products structure",
+            "description": "Ensure compatibility with products table",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Preserve existing data",
+            "description": "Ensure no data loss during migration",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Add variant support",
+            "description": "Enable size/color variants",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Create migration script for stock management",
+        "description": "Create all stock management tables",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "6"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create stock_levels table",
+            "description": "SQL for stock quantities table",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Create stock_movements table",
+            "description": "SQL for stock change tracking",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Create stock_reservations table",
+            "description": "SQL for reservation tracking",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Initialize stock data",
+            "description": "Populate initial stock levels",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Implement foreign key relationships",
+        "description": "Create all necessary foreign key constraints",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "User-Order relationships",
+            "description": "Link orders to users",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Product-Stock relationships",
+            "description": "Connect products to stock levels",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Order-Product relationships",
+            "description": "Link order items to products",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Vendor-Product relationships",
+            "description": "Associate products with vendors",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Create database indexes for performance",
+        "description": "Add indexes for query optimization",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "11"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create primary key indexes",
+            "description": "Ensure all PKs are indexed",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Add foreign key indexes",
+            "description": "Index all FK columns",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Create composite indexes",
+            "description": "Multi-column indexes for complex queries",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Add full-text search indexes",
+            "description": "Enable fast text searching",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Implement Row Level Security policies",
+        "description": "Create RLS policies for all tables",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "11"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Enable RLS on all tables",
+            "description": "Turn on row level security",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Create user access policies",
+            "description": "Define what users can see/modify",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Create vendor policies",
+            "description": "Vendor-specific data access",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Test security boundaries",
+            "description": "Verify policies work correctly",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Create database triggers and functions",
+        "description": "Implement automated database logic",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "11"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Stock update triggers",
+            "description": "Auto-update stock on order/cancel",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Audit log triggers",
+            "description": "Track all data changes",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Validation functions",
+            "description": "Ensure data integrity",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Calculation functions",
+            "description": "Complex calculations in database",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Update API integration for new schema",
+        "description": "Modify all API calls to use new structure",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "13",
+          "14"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update Supabase client queries",
+            "description": "Modify all database queries"
+          },
+          {
+            "id": 2,
+            "title": "Fix type definitions",
+            "description": "Update TypeScript types"
+          },
+          {
+            "id": 3,
+            "title": "Add error handling",
+            "description": "Handle migration edge cases"
+          },
+          {
+            "id": 4,
+            "title": "Implement retry logic",
+            "description": "Add resilience to API calls"
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Update frontend components for new schema",
+        "description": "Modify React components to work with new data",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "15"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update product components",
+            "description": "Use new products table structure"
+          },
+          {
+            "id": 2,
+            "title": "Fix user components",
+            "description": "Handle vendor fields"
+          },
+          {
+            "id": 3,
+            "title": "Update stock displays",
+            "description": "Show real-time stock levels"
+          },
+          {
+            "id": 4,
+            "title": "Fix form validations",
+            "description": "Align with new constraints"
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Create data validation and cleanup scripts",
+        "description": "Ensure data integrity after migration",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "15"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Validate migrated data",
+            "description": "Check all data transferred correctly"
+          },
+          {
+            "id": 2,
+            "title": "Clean orphaned records",
+            "description": "Remove broken relationships"
+          },
+          {
+            "id": 3,
+            "title": "Fix data inconsistencies",
+            "description": "Resolve conflicting data"
+          },
+          {
+            "id": 4,
+            "title": "Verify constraints",
+            "description": "Ensure all constraints satisfied"
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Test migration scripts in development",
+        "description": "Thoroughly test all migration scripts",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "17"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create test database",
+            "description": "Clone production for testing"
+          },
+          {
+            "id": 2,
+            "title": "Run migration scripts",
+            "description": "Execute all migrations"
+          },
+          {
+            "id": 3,
+            "title": "Test rollback procedures",
+            "description": "Verify we can undo changes"
+          },
+          {
+            "id": 4,
+            "title": "Performance testing",
+            "description": "Ensure no performance degradation"
+          }
+        ]
+      },
+      {
+        "id": 19,
+        "title": "Document new schema structure",
+        "description": "Create comprehensive documentation",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "18"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create schema diagrams",
+            "description": "Visual documentation"
+          },
+          {
+            "id": 2,
+            "title": "Write API documentation",
+            "description": "Document all endpoints"
+          },
+          {
+            "id": 3,
+            "title": "Create migration guide",
+            "description": "Step-by-step instructions"
+          },
+          {
+            "id": 4,
+            "title": "Document RLS policies",
+            "description": "Explain security model"
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "title": "Set up monitoring and logging",
+        "description": "Implement observability for new system",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "18"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure database monitoring",
+            "description": "Track query performance"
+          },
+          {
+            "id": 2,
+            "title": "Set up error logging",
+            "description": "Capture all errors"
+          },
+          {
+            "id": 3,
+            "title": "Create alerts",
+            "description": "Notify on issues"
+          },
+          {
+            "id": 4,
+            "title": "Build dashboards",
+            "description": "Visualize system health"
+          }
+        ]
+      },
+      {
+        "id": 21,
+        "title": "Create vendor management system",
+        "description": "Build vendor-specific functionality",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "16"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create vendor profiles table",
+            "description": "Store vendor information"
+          },
+          {
+            "id": 2,
+            "title": "Build vendor dashboard",
+            "description": "Vendor-specific UI"
+          },
+          {
+            "id": 3,
+            "title": "Implement vendor permissions",
+            "description": "Access control for vendors"
+          },
+          {
+            "id": 4,
+            "title": "Add vendor analytics",
+            "description": "Track vendor performance"
+          }
+        ]
+      },
+      {
+        "id": 22,
+        "title": "Fix image management and placeholder API",
+        "description": "Resolve image handling issues",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "16"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Fix placeholder API integration",
+            "description": "Resolve API connection issues"
+          },
+          {
+            "id": 2,
+            "title": "Create image storage structure",
+            "description": "Organize image storage"
+          },
+          {
+            "id": 3,
+            "title": "Implement CDN integration",
+            "description": "Use CDN for images"
+          },
+          {
+            "id": 4,
+            "title": "Add fallback images",
+            "description": "Handle missing images"
+          }
+        ]
+      },
+      {
+        "id": 23,
+        "title": "Execute production deployment",
+        "description": "Deploy all changes to production",
+        "status": "pending",
+        "priority": "critical",
+        "dependencies": [
+          "19",
+          "20",
+          "21",
+          "22"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Schedule maintenance window",
+            "description": "Plan downtime"
+          },
+          {
+            "id": 2,
+            "title": "Execute backup procedures",
+            "description": "Final production backup"
+          },
+          {
+            "id": 3,
+            "title": "Run migration scripts",
+            "description": "Apply all changes"
+          },
+          {
+            "id": 4,
+            "title": "Verify deployment",
+            "description": "Test production system"
+          }
+        ]
+      },
+      {
+        "id": 24,
+        "title": "Perform post-migration optimization",
+        "description": "Optimize the new system",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          "23"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze query performance",
+            "description": "Find slow queries"
+          },
+          {
+            "id": 2,
+            "title": "Optimize indexes",
+            "description": "Fine-tune index strategy"
+          },
+          {
+            "id": 3,
+            "title": "Update statistics",
+            "description": "Help query planner"
+          },
+          {
+            "id": 4,
+            "title": "Review configuration",
+            "description": "Optimize database settings"
+          }
+        ]
+      },
+      {
+        "id": 25,
+        "title": "Frontend and Database Integration Verification",
+        "description": "Comprehensive testing of frontend routes, API endpoints, database connectivity, and user interface functionality after database reorganization. Verify that routes work correctly, frontend communicates perfectly with Supabase DB, and all functionality is working as expected.",
+        "status": "pending",
+        "priority": "critical",
+        "dependencies": [
+          "24"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Test all frontend routes and navigation",
+            "description": "Verify all pages load correctly and navigation works across the entire frontend"
+          },
+          {
+            "id": 2,
+            "title": "Verify API endpoint functionality",
+            "description": "Test all API endpoints to ensure they work with the new database schema"
+          },
+          {
+            "id": 3,
+            "title": "Test Supabase database connectivity",
+            "description": "Verify frontend communicates perfectly with Supabase DB and all queries work"
+          },
+          {
+            "id": 4,
+            "title": "Validate user interface functionality",
+            "description": "Test all UI components, forms, and user interactions work correctly"
+          },
+          {
+            "id": 5,
+            "title": "Test inventory management features",
+            "description": "Verify stock management, vendor features, and product functionality work properly"
+          },
+          {
+            "id": 6,
+            "title": "Verify data integrity and consistency",
+            "description": "Ensure all data displays correctly and consistently across the application"
+          }
+        ]
+      },
+      {
+        "id": 26,
+        "title": "Test all front-end routes and database connections",
+        "description": "Verify all pages work with new database schema, fix broken routes, test authentication, product pages, cart, vendor management, and admin features",
+        "status": "in-progress",
+        "priority": "high",
+        "dependencies": [
+          "25"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Test main navigation and public routes",
+            "description": "Verify home, products, brands, collections, about pages work correctly",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Test user authentication and profile routes",
+            "description": "Check login, register, profile, settings, vendor status detection",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Test product and catalog functionality",
+            "description": "Verify product listings, detail pages, search, filtering with new schema",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Test cart and checkout flow",
+            "description": "Check add to cart, cart management, checkout process with updated database",
+            "status": "done"
+          },
+          {
+            "id": 5,
+            "title": "Test vendor management features",
+            "description": "Verify vendor dashboard, product management, order management routes"
+          },
+          {
+            "id": 6,
+            "title": "Test admin features and dashboard",
+            "description": "Check admin routes, user management, system monitoring, analytics"
+          },
+          {
+            "id": 7,
+            "title": "Fix database connection issues",
+            "description": "Update any broken Supabase queries, fix schema mismatches, ensure RLS policies work"
+          },
+          {
+            "id": 8,
+            "title": "Propose new route adaptations",
+            "description": "Identify and propose new routes needed for improved front-end functionality"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-09-21T08:55:09.967Z",
+      "updated": "2025-09-21T12:53:04.575Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

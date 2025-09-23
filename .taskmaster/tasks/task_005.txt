@@ -1,0 +1,37 @@
+# Task ID: 5
+# Title: Design enhanced users table with vendor support
+# Status: done
+# Dependencies: 3
+# Priority: high
+# Description: Update users table to support vendor functionality
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Add vendor_id column [done]
+### Dependencies: None
+### Description: Add vendor identifier with proper constraints
+### Details:
+
+
+## 2. Add vendor-specific fields [done]
+### Dependencies: None
+### Description: Include vendor status, commission rate, etc.
+### Details:
+
+
+## 3. Design vendor permissions structure [done]
+### Dependencies: None
+### Description: Create role-based vendor access control
+### Details:
+
+
+## 4. Add vendor analytics fields [done]
+### Dependencies: None
+### Description: Track vendor performance metrics
+### Details:
+
+

@@ -1,0 +1,37 @@
+# Task ID: 9
+# Title: Create migration script for sneakers table
+# Status: done
+# Dependencies: 4
+# Priority: high
+# Description: Update sneakers table to align with new structure
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Add missing stock columns [done]
+### Dependencies: None
+### Description: Add stock tracking fields to sneakers
+### Details:
+
+
+## 2. Align with products structure [done]
+### Dependencies: None
+### Description: Ensure compatibility with products table
+### Details:
+
+
+## 3. Preserve existing data [done]
+### Dependencies: None
+### Description: Ensure no data loss during migration
+### Details:
+
+
+## 4. Add variant support [done]
+### Dependencies: None
+### Description: Enable size/color variants
+### Details:
+
+

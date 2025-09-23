@@ -1,0 +1,37 @@
+# Task ID: 11
+# Title: Implement foreign key relationships
+# Status: pending
+# Dependencies: 7, 8, 9, 10
+# Priority: medium
+# Description: Create all necessary foreign key constraints
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. User-Order relationships [pending]
+### Dependencies: None
+### Description: Link orders to users
+### Details:
+
+
+## 2. Product-Stock relationships [pending]
+### Dependencies: None
+### Description: Connect products to stock levels
+### Details:
+
+
+## 3. Order-Product relationships [pending]
+### Dependencies: None
+### Description: Link order items to products
+### Details:
+
+
+## 4. Vendor-Product relationships [pending]
+### Dependencies: None
+### Description: Associate products with vendors
+### Details:
+
+

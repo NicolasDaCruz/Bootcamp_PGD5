@@ -1,0 +1,37 @@
+# Task ID: 6
+# Title: Design stock management tables structure
+# Status: done
+# Dependencies: 4, 5
+# Priority: high
+# Description: Create comprehensive stock tracking system
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Create stock_levels table [done]
+### Dependencies: None
+### Description: Current stock quantities per product/variant
+### Details:
+
+
+## 2. Create stock_movements table [done]
+### Dependencies: None
+### Description: Track all stock changes with reasons
+### Details:
+
+
+## 3. Create stock_reservations table [done]
+### Dependencies: None
+### Description: Handle cart and order reservations
+### Details:
+
+
+## 4. Create stock_alerts table [done]
+### Dependencies: None
+### Description: Low stock notifications system
+### Details:
+
+

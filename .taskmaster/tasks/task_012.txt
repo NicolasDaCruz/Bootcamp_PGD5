@@ -1,0 +1,37 @@
+# Task ID: 12
+# Title: Create database indexes for performance
+# Status: pending
+# Dependencies: 11
+# Priority: medium
+# Description: Add indexes for query optimization
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Create primary key indexes [pending]
+### Dependencies: None
+### Description: Ensure all PKs are indexed
+### Details:
+
+
+## 2. Add foreign key indexes [pending]
+### Dependencies: None
+### Description: Index all FK columns
+### Details:
+
+
+## 3. Create composite indexes [pending]
+### Dependencies: None
+### Description: Multi-column indexes for complex queries
+### Details:
+
+
+## 4. Add full-text search indexes [pending]
+### Dependencies: None
+### Description: Enable fast text searching
+### Details:
+
+

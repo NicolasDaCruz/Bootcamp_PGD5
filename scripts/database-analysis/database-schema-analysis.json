@@ -1,0 +1,22 @@
+{
+  "tables": {},
+  "foreignKeys": [],
+  "dataVolume": {},
+  "orphanedData": [],
+  "errors": [
+    {
+      "step": "listTables",
+      "error": "Failed to get tables: Could not find the function public.execute_sql(query) in the schema cache"
+    },
+    {
+      "step": "foreignKeys",
+      "error": "Failed to get foreign keys: Could not find the function public.execute_sql(query) in the schema cache"
+    }
+  ],
+  "analysis": {
+    "timestamp": "2025-09-21T09:10:38.828Z",
+    "totalTables": 0,
+    "totalColumns": 0,
+    "totalRecords": 0
+  }
+}

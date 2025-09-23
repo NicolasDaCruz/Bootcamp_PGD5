@@ -1,0 +1,37 @@
+# Task ID: 19
+# Title: Document new schema structure
+# Status: pending
+# Dependencies: 18
+# Priority: medium
+# Description: Create comprehensive documentation
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Create schema diagrams [pending]
+### Dependencies: None
+### Description: Visual documentation
+### Details:
+
+
+## 2. Write API documentation [pending]
+### Dependencies: None
+### Description: Document all endpoints
+### Details:
+
+
+## 3. Create migration guide [pending]
+### Dependencies: None
+### Description: Step-by-step instructions
+### Details:
+
+
+## 4. Document RLS policies [pending]
+### Dependencies: None
+### Description: Explain security model
+### Details:
+
+

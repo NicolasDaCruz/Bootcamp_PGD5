@@ -1,0 +1,43 @@
+2025-09-21 11:07:23 - === Database Backup Verification Script ===
+2025-09-21 11:07:23 - Timestamp: 20250921_110723
+2025-09-21 11:07:23 - Backup Directory: /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup
+2025-09-21 11:07:23 - Log File: /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup/verification/verification_20250921_110723.log
+2025-09-21 11:07:23 - 
+2025-09-21 11:07:23 - 1. Checking backup file structure...
+2025-09-21 11:07:23 -   ✓ Directory exists: schemas/
+2025-09-21 11:07:23 -   ✓ Directory exists: data/
+2025-09-21 11:07:23 -   ✓ Directory exists: json/
+2025-09-21 11:07:23 -   ✓ Directory exists: scripts/
+2025-09-21 11:07:23 -   ✓ Directory exists: verification/
+2025-09-21 11:07:23 -   Checking schema backups...
+2025-09-21 11:07:23 -   ✗ Latest schema backup: MISSING - /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup/schemas/latest_schema.sql
+2025-09-21 11:07:23 -   Checking data backups...
+2025-09-21 11:07:23 -   ✗ Latest data backup: MISSING - /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup/data/latest_data.sql
+2025-09-21 11:07:23 -   ✗ Latest compressed data backup: MISSING - /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup/data/latest_data.sql.gz
+2025-09-21 11:07:23 -   Checking JSON backups...
+2025-09-21 11:07:23 -   ✗ Latest combined JSON backup: MISSING - /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup/json/latest_combined.json
+2025-09-21 11:07:23 -   ✗ users JSON backup missing
+2025-09-21 11:07:23 -   ✗ products JSON backup missing
+2025-09-21 11:07:23 -   ✗ orders JSON backup missing
+2025-09-21 11:07:23 - 2. Verifying database connection...
+2025-09-21 11:07:23 -   ✗ Supabase CLI not found
+2025-09-21 11:07:23 -   Warning: Cannot verify against current database
+2025-09-21 11:07:23 - 4. Checking script permissions...
+2025-09-21 11:07:23 -   ✓ backup-schemas.sh is executable
+2025-09-21 11:07:23 -   ✓ backup-data.sh is executable
+2025-09-21 11:07:23 -   ✓ backup-critical-json.sh is executable
+2025-09-21 11:07:23 -   ✓ verify-backups.sh is executable
+2025-09-21 11:07:23 - 5. Generating verification summary...
+2025-09-21 11:07:23 -   ✓ Verification summary created: /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup/verification/verification_summary_20250921_110723.md
+2025-09-21 11:07:23 - 
+2025-09-21 11:07:23 - === Verification Complete ===
+2025-09-21 11:07:23 - Total Checks: 17
+2025-09-21 11:07:23 - Passed: 9
+2025-09-21 11:07:23 - Failed: 8
+2025-09-21 11:07:23 - Success Rate: 52%
+2025-09-21 11:07:23 - 
+2025-09-21 11:07:23 - ⚠️  ISSUES FOUND! Review the report and fix failed checks.
+2025-09-21 11:07:23 - 
+2025-09-21 11:07:23 - Files:
+2025-09-21 11:07:23 -   - Detailed log: /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup/verification/verification_20250921_110723.log
+2025-09-21 11:07:23 -   - Summary report: /Users/nicodcz/Desktop/PGD 5/Bootcamp/sneaker-store/database-backup/verification/verification_summary_20250921_110723.md

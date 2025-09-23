@@ -1,0 +1,1040 @@
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
+import { supabase } from '@/lib/supabase';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Star,
+  Heart,
+  Eye,
+  ShoppingCart,
+  Filter,
+  X,
+  Grid,
+  List,
+  ChevronDown,
+  Search,
+  SlidersHorizontal,
+  Trash2
+} from 'lucide-react';
+import ProductImage from '../../components/ProductImage';
+import SmartSearch from '../../components/SmartSearch';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import Link from 'next/link';
+
+// Enhanced Product interface
+interface Product {
+  id: string;
+  slug: string;
+  name: string;
+  brand: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  rating: number;
+  reviewCount: number;
+  isNew?: boolean;
+  isOnSale?: boolean;
+  category: string;
+  colors: string[];
+  sizes: string[];
+  description: string;
+  tags: string[];
+}
+
+// Filter state interface
+interface Filters {
+  brands: string[];
+  sizes: string[];
+  colors: string[];
+  priceRange: [number, number];
+  category: string;
+  sortBy: string;
+}
+
+// Available filter options
+const FILTER_OPTIONS = {
+  brands: ['Nike', 'Adidas', 'New Balance', 'Converse', 'Vans', 'Jordan', 'Puma', 'Reebok'],
+  sizes: ['US 6', 'US 7', 'US 8', 'US 9', 'US 10', 'US 11', 'US 12', 'US 13'],
+  colors: ['Black', 'White', 'Red', 'Blue', 'Green', 'Gray', 'Brown', 'Pink', 'Purple', 'Yellow'],
+  categories: ['All Categories', 'Basketball', 'Running', 'Lifestyle', 'Skateboarding', 'Training'],
+  sortOptions: [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'price-low', label: 'Price: Low to High' },
+    { value: 'price-high', label: 'Price: High to Low' },
+    { value: 'rating', label: 'Highest Rated' },
+    { value: 'popular', label: 'Most Popular' }
+  ]
+};
+
+export default function ProductCatalog() {
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSizeModal, setShowSizeModal] = useState<string | null>(null);
+
+  // Context hooks
+  const { addToCartWithNotification } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+
+  // Filter state
+  const [filters, setFilters] = useState<Filters>({
+    brands: [],
+    sizes: [],
+    colors: [],
+    priceRange: [0, 500],
+    category: 'All Categories',
+    sortBy: 'newest'
+  });
+
+  // Real product data from KicksDB database
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch products from KicksDB database
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // Use REAL KicksDB scraped data
+        const { data: productsData, error } = await supabase
+          .from('sneakers')
+          .select(`
+            id,
+            brand,
+            model,
+            colorway,
+            price,
+            sku,
+            image_url,
+            in_stock,
+            description
+          `)
+          .eq('in_stock', true);
+
+        if (error) {
+          console.error('Error fetching products:', error);
+          return;
+        }
+
+        // Map REAL KicksDB data to frontend Product format
+        const formattedProducts: Product[] = productsData?.map(sneaker => ({
+          id: sneaker.id,
+          name: `${sneaker.brand} ${sneaker.model}`,
+          brand: sneaker.brand,
+          price: parseFloat(sneaker.price),
+          originalPrice: undefined, // KicksDB doesn't have sale prices
+          image: sneaker.image_url || '/api/placeholder/400/400',
+          rating: 4.5 + Math.random() * 0.5, // Mock rating for now
+          reviewCount: Math.floor(Math.random() * 500) + 50, // Mock review count
+          isNew: Math.random() > 0.8, // Fewer "new" items
+          isOnSale: false, // No sales in KicksDB data
+          category: 'Sneakers',
+          colors: [sneaker.colorway || 'Default'],
+          sizes: ['US 7', 'US 8', 'US 9', 'US 10', 'US 11', 'US 12'], // Default sizes
+          description: sneaker.description || `${sneaker.brand} ${sneaker.model} - Premium sneakers with exceptional quality and style.`,
+          tags: [sneaker.brand.toLowerCase(), 'sneakers', 'athletic'],
+          slug: `${sneaker.brand.toLowerCase()}-${sneaker.model.toLowerCase()}-${sneaker.sku}`.replace(/\s+/g, '-'),
+          sale_price: undefined
+        })) || [];
+
+        setProducts(formattedProducts);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Helper functions for cart and wishlist
+      originalPrice: 190,
+      image: '/api/placeholder/400/400',
+      rating: 4.8,
+      reviewCount: 1247,
+      isNew: true,
+      isOnSale: true,
+      category: 'Basketball',
+      colors: ['Red', 'Black', 'White'],
+      sizes: ['US 7', 'US 8', 'US 9', 'US 10', 'US 11', 'US 12'],
+      description: 'Iconic basketball shoe with legendary style',
+      tags: ['retro', 'basketball', 'iconic']
+    },
+    {
+      id: '2',
+      slug: 'yeezy-350-zebra',
+      name: 'Yeezy Boost 350 V2 "Zebra"',
+      brand: 'Adidas',
+      price: 220,
+      image: '/api/placeholder/400/400',
+      rating: 4.6,
+      reviewCount: 892,
+      isNew: false,
+      category: 'Lifestyle',
+      colors: ['White', 'Black'],
+      sizes: ['US 8', 'US 9', 'US 10', 'US 11'],
+      description: 'Premium lifestyle sneaker with boost technology',
+      tags: ['lifestyle', 'comfort', 'boost']
+    },
+    {
+      id: '3',
+      slug: 'nike-dunk-low-panda',
+      name: 'Nike Dunk Low "Panda"',
+      brand: 'Nike',
+      price: 100,
+      originalPrice: 120,
+      image: '/api/placeholder/400/400',
+      rating: 4.7,
+      reviewCount: 2156,
+      isOnSale: true,
+      category: 'Skateboarding',
+      colors: ['White', 'Black'],
+      sizes: ['US 6', 'US 7', 'US 8', 'US 9', 'US 10', 'US 11'],
+      description: 'Classic skateboarding shoe with timeless appeal',
+      tags: ['skateboarding', 'classic', 'versatile']
+    },
+    {
+      id: '4',
+      slug: 'chuck-taylor-classic',
+      name: 'Chuck Taylor All Star "Classic"',
+      brand: 'Converse',
+      price: 65,
+      image: '/api/placeholder/400/400',
+      rating: 4.5,
+      reviewCount: 3421,
+      category: 'Lifestyle',
+      colors: ['Black', 'White', 'Red'],
+      sizes: ['US 6', 'US 7', 'US 8', 'US 9', 'US 10', 'US 11', 'US 12'],
+      description: 'Timeless canvas sneaker for everyday wear',
+      tags: ['classic', 'canvas', 'everyday']
+    },
+    {
+      id: '5',
+      slug: 'air-force-1-triple-white',
+      name: 'Air Force 1 \'07 "Triple White"',
+      brand: 'Nike',
+      price: 90,
+      image: '/api/placeholder/400/400',
+      rating: 4.9,
+      reviewCount: 5234,
+      isNew: true,
+      category: 'Lifestyle',
+      colors: ['White'],
+      sizes: ['US 7', 'US 8', 'US 9', 'US 10', 'US 11', 'US 12', 'US 13'],
+      description: 'Iconic basketball-inspired lifestyle sneaker',
+      tags: ['iconic', 'lifestyle', 'basketball']
+    },
+    {
+      id: '6',
+      slug: 'vans-old-skool-black-white',
+      name: 'Old Skool "Black/White"',
+      brand: 'Vans',
+      price: 65,
+      originalPrice: 75,
+      image: '/api/placeholder/400/400',
+      rating: 4.4,
+      reviewCount: 1876,
+      isOnSale: true,
+      category: 'Skateboarding',
+      colors: ['Black', 'White'],
+      sizes: ['US 7', 'US 8', 'US 9', 'US 10', 'US 11'],
+      description: 'Classic skateboarding shoe with signature side stripe',
+      tags: ['skateboarding', 'classic', 'waffle sole']
+    },
+    {
+      id: '7',
+      slug: 'new-balance-550-white-green',
+      name: '550 "White/Green"',
+      brand: 'New Balance',
+      price: 110,
+      image: '/api/placeholder/400/400',
+      rating: 4.6,
+      reviewCount: 743,
+      isNew: true,
+      category: 'Lifestyle',
+      colors: ['White', 'Green'],
+      sizes: ['US 8', 'US 9', 'US 10', 'US 11', 'US 12'],
+      description: 'Retro basketball shoe with premium leather construction',
+      tags: ['retro', 'basketball', 'leather']
+    },
+    {
+      id: '8',
+      slug: 'nike-blazer-mid-77-vintage',
+      name: 'Blazer Mid \'77 "Vintage"',
+      brand: 'Nike',
+      price: 100,
+      image: '/api/placeholder/400/400',
+      rating: 4.5,
+      reviewCount: 1234,
+      category: 'Lifestyle',
+      colors: ['White', 'Blue'],
+      sizes: ['US 7', 'US 8', 'US 9', 'US 10', 'US 11'],
+      description: 'Classic mid-top sneaker with vintage appeal',
+      tags: ['classic', 'mid-top', 'vintage']
+    }
+  ];
+
+  // Helper functions for cart and wishlist
+  const handleAddToCart = (product: Product) => {
+    // For products with multiple sizes, show size selection modal
+    if (product.sizes.length > 1) {
+      setShowSizeModal(product.id);
+    } else {
+      // Add with default size
+      addToCartWithNotification({
+        productId: product.id,
+        name: product.name,
+        brand: product.brand,
+        price: product.price,
+        image: product.image,
+        size: product.sizes[0] || 'US 10',
+        color: product.colors[0] || 'Default',
+        quantity: 1,
+        maxStock: 10
+      });
+    }
+  };
+
+  const handleAddToCartWithSize = (product: Product, size: string) => {
+    addToCartWithNotification({
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      image: product.image,
+      size: size,
+      color: product.colors[0] || 'Default',
+      quantity: 1,
+      maxStock: 10
+    });
+    setShowSizeModal(null);
+  };
+
+  const handleWishlistToggle = (product: Product) => {
+    const wishlistItem = {
+      id: product.id,
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      image: product.image,
+      category: product.category,
+      rating: product.rating,
+      reviewCount: product.reviewCount,
+      isNew: product.isNew,
+      isOnSale: product.isOnSale,
+      dateAdded: new Date().toISOString(),
+      slug: product.slug
+    };
+
+    toggleWishlist(wishlistItem);
+  };
+
+  // Filter and search logic
+  const filteredProducts = useMemo(() => {
+    let filtered = products.filter(product => {
+      // Search query filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch =
+          product.name.toLowerCase().includes(query) ||
+          product.brand.toLowerCase().includes(query) ||
+          product.category.toLowerCase().includes(query) ||
+          product.tags.some(tag => tag.toLowerCase().includes(query));
+
+        if (!matchesSearch) return false;
+      }
+
+      // Brand filter
+      if (filters.brands.length > 0 && !filters.brands.includes(product.brand)) {
+        return false;
+      }
+
+      // Size filter
+      if (filters.sizes.length > 0 && !filters.sizes.some(size => product.sizes.includes(size))) {
+        return false;
+      }
+
+      // Color filter
+      if (filters.colors.length > 0 && !filters.colors.some(color => product.colors.includes(color))) {
+        return false;
+      }
+
+      // Price range filter
+      if (product.price < filters.priceRange[0] || product.price > filters.priceRange[1]) {
+        return false;
+      }
+
+      // Category filter
+      if (filters.category !== 'All Categories' && product.category !== filters.category) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Sort products
+    filtered.sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'rating':
+          return b.rating - a.rating;
+        case 'popular':
+          return b.reviewCount - a.reviewCount;
+        case 'newest':
+        default:
+          return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
+      }
+    });
+
+    return filtered;
+  }, [products, filters, searchQuery]);
+
+  // Filter manipulation functions
+  const updateFilter = (filterType: keyof Filters, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const toggleArrayFilter = (filterType: 'brands' | 'sizes' | 'colors', value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: prev[filterType].includes(value)
+        ? prev[filterType].filter(item => item !== value)
+        : [...prev[filterType], value]
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      brands: [],
+      sizes: [],
+      colors: [],
+      priceRange: [0, 500],
+      category: 'All Categories',
+      sortBy: 'newest'
+    });
+    setSearchQuery('');
+  };
+
+  const hasActiveFilters =
+    filters.brands.length > 0 ||
+    filters.sizes.length > 0 ||
+    filters.colors.length > 0 ||
+    filters.priceRange[0] > 0 ||
+    filters.priceRange[1] < 500 ||
+    filters.category !== 'All Categories' ||
+    searchQuery !== '';
+
+
+  // Handle filter suggestions from smart search
+  const handleFilterSuggestion = (filterType: string, value: string) => {
+    if (filterType === 'brands') {
+      toggleArrayFilter('brands', value);
+    } else if (filterType === 'category') {
+      updateFilter('category', value);
+    } else if (filterType === 'tags') {
+      // Search for products with this tag
+      setSearchQuery(value);
+    }
+  };
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+              Sneaker Collection
+            </h1>
+            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl">
+              Discover our curated selection of premium sneakers from top brands worldwide
+            </p>
+          </motion.div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="flex gap-8">
+          {/* Sidebar Filters */}
+          <div className={`${showFilters ? 'block' : 'hidden'} lg:block w-80 flex-shrink-0`}>
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 sticky top-8"
+            >
+              {/* Filter Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                  <SlidersHorizontal className="w-5 h-5" />
+                  Filters
+                </h3>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 flex items-center gap-1 text-sm"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Clear All
+                  </button>
+                )}
+              </div>
+
+              {/* Smart Search */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Search
+                </label>
+                <SmartSearch
+                  products={products}
+                  onSearch={setSearchQuery}
+                  onFilterSuggestion={handleFilterSuggestion}
+                  placeholder="Search sneakers, brands, or categories..."
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Category
+                </label>
+                <select
+                  value={filters.category}
+                  onChange={(e) => updateFilter('category', e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {FILTER_OPTIONS.categories.map(category => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Brand Filter */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Brands
+                </label>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {FILTER_OPTIONS.brands.map(brand => (
+                    <label key={brand} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={filters.brands.includes(brand)}
+                        onChange={() => toggleArrayFilter('brands', brand)}
+                        className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-slate-700"
+                      />
+                      <span className="ml-2 text-sm text-slate-700 dark:text-slate-300">{brand}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Size Filter */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Sizes
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {FILTER_OPTIONS.sizes.map(size => (
+                    <button
+                      key={size}
+                      onClick={() => toggleArrayFilter('sizes', size)}
+                      className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                        filters.sizes.includes(size)
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:border-blue-500'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Color Filter */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Colors
+                </label>
+                <div className="grid grid-cols-5 gap-2">
+                  {FILTER_OPTIONS.colors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => toggleArrayFilter('colors', color)}
+                      className={`w-8 h-8 rounded-full border-2 transition-all relative ${
+                        filters.colors.includes(color)
+                          ? 'border-blue-600 ring-2 ring-blue-600/30'
+                          : 'border-slate-300 dark:border-slate-600 hover:border-blue-500'
+                      }`}
+                      style={{
+                        backgroundColor: color === 'Black' ? '#000' :
+                                       color === 'White' ? '#fff' :
+                                       color === 'Red' ? '#ef4444' :
+                                       color === 'Blue' ? '#3b82f6' :
+                                       color === 'Green' ? '#22c55e' :
+                                       color === 'Gray' ? '#6b7280' :
+                                       color === 'Brown' ? '#a3845a' :
+                                       color === 'Pink' ? '#ec4899' :
+                                       color === 'Purple' ? '#8b5cf6' :
+                                       '#eab308'
+                      }}
+                      title={color}
+                    >
+                      {filters.colors.includes(color) && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className={`w-2 h-2 rounded-full ${color === 'White' ? 'bg-black' : 'bg-white'}`} />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="500"
+                    value={filters.priceRange[0]}
+                    onChange={(e) => updateFilter('priceRange', [parseInt(e.target.value), filters.priceRange[1]])}
+                    className="w-full"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="500"
+                    value={filters.priceRange[1]}
+                    onChange={(e) => updateFilter('priceRange', [filters.priceRange[0], parseInt(e.target.value)])}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Controls Bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-4 mb-8"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="lg:hidden flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  >
+                    <Filter className="w-4 h-4" />
+                    Filters
+                  </button>
+
+                  <span className="text-slate-600 dark:text-slate-400">
+                    Showing {filteredProducts.length} of {products.length} products
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  {/* Sort Dropdown */}
+                  <select
+                    value={filters.sortBy}
+                    onChange={(e) => updateFilter('sortBy', e.target.value)}
+                    className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  >
+                    {FILTER_OPTIONS.sortOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* View Mode Toggle */}
+                  <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white dark:bg-slate-600 shadow' : ''}`}
+                    >
+                      <Grid className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded ${viewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow' : ''}`}
+                    >
+                      <List className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Products Grid/List */}
+            {filteredProducts.length > 0 && (
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className={
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8'
+                    : 'space-y-6'
+                }
+              >
+                <AnimatePresence>
+                  {filteredProducts.map((product) => (
+                  <motion.div
+                    key={product.id}
+                    variants={cardVariants}
+                    exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.3 } }}
+                    whileHover={{
+                      y: -10,
+                      boxShadow: "0 25px 50px -10px rgba(0, 0, 0, 0.15)",
+                      transition: { duration: 0.3 }
+                    }}
+                    onHoverStart={() => setHoveredProduct(product.id)}
+                    onHoverEnd={() => setHoveredProduct(null)}
+                    className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-slate-700 ${
+                      viewMode === 'list' ? 'flex' : ''
+                    }`}
+                  >
+                    <Link href={`/products/${product.slug}`} className="block h-full">
+                    {/* Product Image */}
+                    <div className={`relative overflow-hidden bg-slate-50 dark:bg-slate-700 ${
+                      viewMode === 'list' ? 'w-48 h-48' : 'aspect-square'
+                    }`}>
+                      {/* Badges */}
+                      <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                        {product.isNew && (
+                          <span className="bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                            NEW
+                          </span>
+                        )}
+                        {product.isOnSale && (
+                          <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                            SALE
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Favorite Button */}
+                      <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{
+                          opacity: hoveredProduct === product.id ? 1 : 0,
+                          scale: hoveredProduct === product.id ? 1 : 0.8
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleWishlistToggle(product);
+                        }}
+                        className="absolute top-3 right-3 z-10 w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        <Heart
+                          className={`w-5 h-5 transition-colors duration-200 ${
+                            isInWishlist(product.id)
+                              ? 'text-red-500 fill-red-500'
+                              : 'text-slate-400 hover:text-red-500'
+                          }`}
+                        />
+                      </motion.button>
+
+                      {/* Product Image */}
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="w-full h-full relative"
+                      >
+                        <ProductImage
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          sizes={viewMode === 'list' ? '192px' : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'}
+                        />
+                      </motion.div>
+
+                      {/* Hover Overlay */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: hoveredProduct === product.id ? 1 : 0 }}
+                        className="absolute inset-0 bg-black/20 flex items-center justify-center"
+                      >
+                        <div className="flex gap-3">
+                          <motion.button
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{
+                              y: hoveredProduct === product.id ? 0 : 20,
+                              opacity: hoveredProduct === product.id ? 1 : 0
+                            }}
+                            transition={{ delay: 0.1 }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              // Navigate to product detail page
+                              window.location.href = `/products/${product.slug}`;
+                            }}
+                            className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </motion.button>
+                          <motion.button
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{
+                              y: hoveredProduct === product.id ? 0 : 20,
+                              opacity: hoveredProduct === product.id ? 1 : 0
+                            }}
+                            transition={{ delay: 0.2 }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleAddToCart(product);
+                            }}
+                            className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 hover:bg-blue-700"
+                          >
+                            <ShoppingCart className="w-5 h-5" />
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    {/* Product Info */}
+                    <div className={`p-6 ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                      {/* Brand & Category */}
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                          {product.brand}
+                        </span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          {product.category}
+                        </span>
+                      </div>
+
+                      {/* Product Name */}
+                      <h3 className="font-semibold text-slate-900 dark:text-white mb-3 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+                        {product.name}
+                      </h3>
+
+                      {/* Rating */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < Math.floor(product.rating)
+                                  ? 'text-yellow-400 fill-yellow-400'
+                                  : 'text-slate-300 dark:text-slate-600'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-slate-600 dark:text-slate-400">
+                          {product.rating} ({product.reviewCount})
+                        </span>
+                      </div>
+
+                      {/* Available Sizes */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Sizes:</span>
+                        <div className="flex gap-1">
+                          {product.sizes.slice(0, 3).map((size, index) => (
+                            <span
+                              key={index}
+                              className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-2 py-1 rounded"
+                            >
+                              {size}
+                            </span>
+                          ))}
+                          {product.sizes.length > 3 && (
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                              +{product.sizes.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Price */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl font-bold text-slate-900 dark:text-white">
+                          ${product.price}
+                        </span>
+                        {product.originalPrice && (
+                          <span className="text-lg text-slate-500 dark:text-slate-400 line-through">
+                            ${product.originalPrice}
+                          </span>
+                        )}
+                        {product.isOnSale && (
+                          <span className="text-sm font-semibold text-red-600 dark:text-red-400">
+                            -{Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    </Link>
+                  </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )}
+
+            {/* No Results */}
+            {filteredProducts.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-16"
+              >
+                <div className="text-6xl mb-4">👟</div>
+                <h3 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">
+                  No sneakers found
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-6">
+                  Try adjusting your filters or search terms
+                </p>
+                <button
+                  onClick={clearFilters}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
+                >
+                  Clear All Filters
+                </button>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Size Selection Modal */}
+      <AnimatePresence>
+        {showSizeModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setShowSizeModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {(() => {
+                const product = products.find(p => p.id === showSizeModal);
+                if (!product) return null;
+
+                return (
+                  <>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                        Select Size
+                      </h3>
+                      <button
+                        onClick={() => setShowSizeModal(null)}
+                        className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-lg overflow-hidden">
+                        <ProductImage
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          sizes="64px"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900 dark:text-white">
+                          {product.name}
+                        </h4>
+                        <p className="text-slate-600 dark:text-slate-400">
+                          ${product.price}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3 mb-6">
+                      {product.sizes.map((size) => (
+                        <motion.button
+                          key={size}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleAddToCartWithSize(product, size)}
+                          className="px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-lg hover:border-blue-600 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+                        >
+                          {size}
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => setShowSizeModal(null)}
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                );
+              })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

@@ -1,0 +1,37 @@
+# Task ID: 14
+# Title: Create database triggers and functions
+# Status: pending
+# Dependencies: 11
+# Priority: medium
+# Description: Implement automated database logic
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Stock update triggers [pending]
+### Dependencies: None
+### Description: Auto-update stock on order/cancel
+### Details:
+
+
+## 2. Audit log triggers [pending]
+### Dependencies: None
+### Description: Track all data changes
+### Details:
+
+
+## 3. Validation functions [pending]
+### Dependencies: None
+### Description: Ensure data integrity
+### Details:
+
+
+## 4. Calculation functions [pending]
+### Dependencies: None
+### Description: Complex calculations in database
+### Details:
+
+

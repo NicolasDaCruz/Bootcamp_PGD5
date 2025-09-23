@@ -1,0 +1,37 @@
+# Task ID: 10
+# Title: Create migration script for stock management
+# Status: pending
+# Dependencies: 6
+# Priority: high
+# Description: Create all stock management tables
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Create stock_levels table [pending]
+### Dependencies: None
+### Description: SQL for stock quantities table
+### Details:
+
+
+## 2. Create stock_movements table [pending]
+### Dependencies: None
+### Description: SQL for stock change tracking
+### Details:
+
+
+## 3. Create stock_reservations table [pending]
+### Dependencies: None
+### Description: SQL for reservation tracking
+### Details:
+
+
+## 4. Initialize stock data [pending]
+### Dependencies: None
+### Description: Populate initial stock levels
+### Details:
+
+

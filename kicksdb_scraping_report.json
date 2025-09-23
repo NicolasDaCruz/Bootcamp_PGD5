@@ -1,0 +1,396 @@
+{
+  "timestamp": "2025-09-18T17:00:43.764Z",
+  "api_used": "KicksDB",
+  "execution_time_seconds": 30,
+  "api_calls_used": 20,
+  "summary": {
+    "total_products": 10,
+    "successful_products": 10,
+    "total_images": 10,
+    "success_rate": "100.0%",
+    "avg_images_per_product": "1.0",
+    "api_calls_per_minute": "40.0"
+  },
+  "results": [
+    {
+      "original": {
+        "id": "c93ab583-6c77-4c16-b144-a30cb71aba11",
+        "brand": "Adidas",
+        "model": "Stan Smith",
+        "colorway": "Cloud White/Green",
+        "size": 9,
+        "price": 80,
+        "release_date": "1971-01-01",
+        "sku": "FX5500-9",
+        "description": "Clean and simple. The Stan Smith shoes are a masterpiece of simplicity.",
+        "image_url": "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/108cc293de524b429c17aae000bfd7b8_9366/Stan_Smith_Shoes_White_FX5500_01_standard.jpg",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "adidas Stan Smith Cloud White Green",
+        "brand": "adidas",
+        "variant": "Cloud White/Green",
+        "images": [
+          {
+            "path": "./public/images/scraped/adidas/stan-smith/cloud-white-green/main.jpg",
+            "url": "https://images.stockx.com/images/adidas-Stan-Smith-Cloud-White-Green.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1630619192",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 42,
+        "outputDir": "./public/images/scraped/adidas/stan-smith/cloud-white-green",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "39376732-a9a0-49c5-affa-2e32595d94aa",
+          "sku": "CQ2871",
+          "slug": "adidas-stan-smith-cloud-white-green"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "3a0fc701-f043-4602-8d5c-6eaddfd54074",
+        "brand": "Adidas",
+        "model": "Stan Smith",
+        "colorway": "Cloud White/Green",
+        "size": 10,
+        "price": 80,
+        "release_date": "1971-01-01",
+        "sku": "FX5500-10",
+        "description": "Clean and simple. The Stan Smith shoes are a masterpiece of simplicity.",
+        "image_url": "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/108cc293de524b429c17aae000bfd7b8_9366/Stan_Smith_Shoes_White_FX5500_01_standard.jpg",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "adidas Stan Smith Cloud White Green",
+        "brand": "adidas",
+        "variant": "Cloud White/Green",
+        "images": [
+          {
+            "path": "./public/images/scraped/adidas/stan-smith/cloud-white-green/main.jpg",
+            "url": "https://images.stockx.com/images/adidas-Stan-Smith-Cloud-White-Green.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1630619192",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 42,
+        "outputDir": "./public/images/scraped/adidas/stan-smith/cloud-white-green",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "39376732-a9a0-49c5-affa-2e32595d94aa",
+          "sku": "CQ2871",
+          "slug": "adidas-stan-smith-cloud-white-green"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "64c8e7aa-7dbb-401e-8810-1be944f43825",
+        "brand": "Adidas",
+        "model": "Stan Smith",
+        "colorway": "Cloud White/Green",
+        "size": 11,
+        "price": 80,
+        "release_date": "1971-01-01",
+        "sku": "FX5500-11",
+        "description": "Clean and simple. The Stan Smith shoes are a masterpiece of simplicity.",
+        "image_url": "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/108cc293de524b429c17aae000bfd7b8_9366/Stan_Smith_Shoes_White_FX5500_01_standard.jpg",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "adidas Stan Smith Cloud White Green",
+        "brand": "adidas",
+        "variant": "Cloud White/Green",
+        "images": [
+          {
+            "path": "./public/images/scraped/adidas/stan-smith/cloud-white-green/main.jpg",
+            "url": "https://images.stockx.com/images/adidas-Stan-Smith-Cloud-White-Green.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1630619192",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 42,
+        "outputDir": "./public/images/scraped/adidas/stan-smith/cloud-white-green",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "39376732-a9a0-49c5-affa-2e32595d94aa",
+          "sku": "CQ2871",
+          "slug": "adidas-stan-smith-cloud-white-green"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "64a202bb-8be1-488f-87fc-278041cc280d",
+        "brand": "Adidas",
+        "model": "Ultraboost 22",
+        "colorway": "Core Black/Grey",
+        "size": 9,
+        "price": 190,
+        "release_date": "2022-01-01",
+        "sku": "GZ0127-9",
+        "description": "These running shoes return energy with every step.",
+        "image_url": "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/fbaf991a8f1d4ac29448ad7f013ee8a0_9366/Ultraboost_22_Shoes_Black_GZ0127_01_standard.jpg",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "adidas Ultra Boost 22 Core Black Magic Grey",
+        "brand": "adidas",
+        "variant": "Core Black/Grey",
+        "images": [
+          {
+            "path": "./public/images/scraped/adidas/ultraboost-22/core-black-grey/main.jpg",
+            "url": "https://images.stockx.com/images/adidas-Ultra-Boost-22-Core-Black-Magic-Grey-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1750713010",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 34,
+        "outputDir": "./public/images/scraped/adidas/ultraboost-22/core-black-grey",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "230784a4-d50e-4703-9854-ac4f08af139e",
+          "sku": "GX3060",
+          "slug": "adidas-ultra-boost-22-core-black-magic-grey"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "d15a286b-d252-444f-a94e-e601bfe99019",
+        "brand": "Adidas",
+        "model": "Ultraboost 22",
+        "colorway": "Core Black/Grey",
+        "size": 10,
+        "price": 190,
+        "release_date": "2022-01-01",
+        "sku": "GZ0127-10",
+        "description": "These running shoes return energy with every step.",
+        "image_url": "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/fbaf991a8f1d4ac29448ad7f013ee8a0_9366/Ultraboost_22_Shoes_Black_GZ0127_01_standard.jpg",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "adidas Ultra Boost 22 Core Black Magic Grey",
+        "brand": "adidas",
+        "variant": "Core Black/Grey",
+        "images": [
+          {
+            "path": "./public/images/scraped/adidas/ultraboost-22/core-black-grey/main.jpg",
+            "url": "https://images.stockx.com/images/adidas-Ultra-Boost-22-Core-Black-Magic-Grey-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1750713010",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 34,
+        "outputDir": "./public/images/scraped/adidas/ultraboost-22/core-black-grey",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "230784a4-d50e-4703-9854-ac4f08af139e",
+          "sku": "GX3060",
+          "slug": "adidas-ultra-boost-22-core-black-magic-grey"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "199f4a6b-dc39-4159-a97f-4b3321571119",
+        "brand": "Air Jordan",
+        "model": "Air Jordan 1",
+        "colorway": "Bred",
+        "size": 9,
+        "price": 170,
+        "release_date": "1985-04-01",
+        "sku": "555088-061-9",
+        "description": "The Air Jordan 1 Retro High OG remakes the classic.",
+        "image_url": "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/00375837-849f-4f17-ba24-d201d27be49b/air-jordan-1-retro-high-og-shoes-DZ5485-612.png",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "Air Jordan 1 Mid Neutral Grey",
+        "brand": "Jordan",
+        "variant": "Bred",
+        "images": [
+          {
+            "path": "./public/images/scraped/air-jordan/air-jordan-1/bred/main.jpg",
+            "url": "https://images.stockx.com/images/Air-Air-Jordan-1-Mid-Neutral-Grey-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1738193358",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 14,
+        "outputDir": "./public/images/scraped/air-jordan/air-jordan-1/bred",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "ff99cd82-b07b-4d3f-9a64-ff7d08c6c06a",
+          "sku": "554724-135",
+          "slug": "air-air-jordan-1-mid-neutral-grey"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "a30f49bb-a225-4855-bb03-4ff507694126",
+        "brand": "Air Jordan",
+        "model": "Air Jordan 1",
+        "colorway": "Bred",
+        "size": 10,
+        "price": 170,
+        "release_date": "1985-04-01",
+        "sku": "555088-061-10",
+        "description": "The Air Jordan 1 Retro High OG remakes the classic.",
+        "image_url": "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/00375837-849f-4f17-ba24-d201d27be49b/air-jordan-1-retro-high-og-shoes-DZ5485-612.png",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "Air Jordan 1 Mid Neutral Grey",
+        "brand": "Jordan",
+        "variant": "Bred",
+        "images": [
+          {
+            "path": "./public/images/scraped/air-jordan/air-jordan-1/bred/main.jpg",
+            "url": "https://images.stockx.com/images/Air-Air-Jordan-1-Mid-Neutral-Grey-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1738193358",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 14,
+        "outputDir": "./public/images/scraped/air-jordan/air-jordan-1/bred",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "ff99cd82-b07b-4d3f-9a64-ff7d08c6c06a",
+          "sku": "554724-135",
+          "slug": "air-air-jordan-1-mid-neutral-grey"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "4c392a02-5e6b-468a-8517-50f0947284f2",
+        "brand": "Air Jordan",
+        "model": "Air Jordan 4",
+        "colorway": "White/Fire Red-Black-Tech Grey",
+        "size": 9,
+        "price": 200,
+        "release_date": "1989-02-01",
+        "sku": "308497-106-9",
+        "description": "The Air Jordan 4 Retro brings back the iconic basketball shoe.",
+        "image_url": "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/i1-6b2b3db9-68d6-49e3-a7e5-8c8d26ac5d4f/air-jordan-4-retro-shoes-zF0Q1d.png",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "Jordan 4 RM Premium White Black Smoke Grey Fire Red",
+        "brand": "Jordan",
+        "variant": "White/Fire Red-Black-Tech Grey",
+        "images": [
+          {
+            "path": "./public/images/scraped/air-jordan/air-jordan-4/white-fire-red-black-tech-grey/main.jpg",
+            "url": "https://images.stockx.com/images/Air-Jordan-4-RM-Premium-White-Black-Smoke-Grey-Fire-Red-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1750860672",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 44,
+        "outputDir": "./public/images/scraped/air-jordan/air-jordan-4/white-fire-red-black-tech-grey",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "7945b10f-f914-4415-94fc-cda4de2e468c",
+          "sku": "IB8052-100",
+          "slug": "air-jordan-4-rm-premium-white-black-smoke-grey-fire-red"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "5417fec7-9b78-440f-9518-c93e5a1e95c2",
+        "brand": "Nike",
+        "model": "Air Force 1",
+        "colorway": "White/White",
+        "size": 9,
+        "price": 110,
+        "release_date": "2007-01-01",
+        "sku": "DV0788-100-9",
+        "description": "The Nike Air Force 1 '07 brings you the iconic look of the original basketball shoe.",
+        "image_url": "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b90837b85dbf/air-force-1-07-shoes-WrLlWX.png",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "Nike Air Force 1 Low '07 White Python (Women's)",
+        "brand": "Nike",
+        "variant": "White/White",
+        "images": [
+          {
+            "path": "./public/images/scraped/nike/air-force-1/white-white/main.jpg",
+            "url": "https://images.stockx.com/images/Nike-Air-Force-1-White-Python-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1738193358",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 34,
+        "outputDir": "./public/images/scraped/nike/air-force-1/white-white",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "7520f5ea-8b45-4b25-85a1-2fd20790f392",
+          "sku": "DX2678-100",
+          "slug": "nike-air-force-1-white-python"
+        }
+      }
+    },
+    {
+      "original": {
+        "id": "b57f3793-fe17-45fd-bfe5-24e5363de62f",
+        "brand": "Nike",
+        "model": "Air Force 1",
+        "colorway": "White/White",
+        "size": 10,
+        "price": 110,
+        "release_date": "2007-01-01",
+        "sku": "DV0788-100-10",
+        "description": "The Nike Air Force 1 '07 brings you the iconic look of the original basketball shoe.",
+        "image_url": "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b90837b85dbf/air-force-1-07-shoes-WrLlWX.png",
+        "in_stock": true,
+        "created_at": "2025-09-17T11:55:20.564039+00:00",
+        "updated_at": "2025-09-17T11:55:20.564039+00:00"
+      },
+      "downloaded": {
+        "productName": "Nike Air Force 1 Low '07 White Python (Women's)",
+        "brand": "Nike",
+        "variant": "White/White",
+        "images": [
+          {
+            "path": "./public/images/scraped/nike/air-force-1/white-white/main.jpg",
+            "url": "https://images.stockx.com/images/Nike-Air-Force-1-White-Python-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1738193358",
+            "index": 0
+          }
+        ],
+        "imageCount": 1,
+        "matchScore": 34,
+        "outputDir": "./public/images/scraped/nike/air-force-1/white-white",
+        "source": "kicksdb",
+        "kicksDBData": {
+          "id": "7520f5ea-8b45-4b25-85a1-2fd20790f392",
+          "sku": "DX2678-100",
+          "slug": "nike-air-force-1-white-python"
+        }
+      }
+    }
+  ]
+}

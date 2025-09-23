@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Order Success Page</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #2563eb;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <div class="test-card">
+        <h1>🧪 Order Success Page Test</h1>
+        <p>Click below to test different scenarios:</p>
+    </div>
+
+    <div class="test-card">
+        <h3>✅ Test Valid Order (with payment_intent)</h3>
+        <p>This simulates a successful payment redirect with the payment intent ID:</p>
+        <a href="http://localhost:3000/order/success?payment_intent=pi_test_bf4fa4212ce6c9ff57b9" class="btn">
+            Test Order #000009
+        </a>
+        <a href="http://localhost:3000/order/success?payment_intent=pi_test_3d75bf50ef8795df43fc" class="btn">
+            Test Order #000010
+        </a>
+        <p class="success">✓ Should show order details successfully</p>
+    </div>
+
+    <div class="test-card">
+        <h3>❌ Test Invalid Scenarios</h3>
+        <p>Test what happens with missing or invalid payment intent:</p>
+        <a href="http://localhost:3000/order/success" class="btn">
+            No Payment Intent
+        </a>
+        <a href="http://localhost:3000/order/success?payment_intent=invalid_id" class="btn">
+            Invalid Payment Intent
+        </a>
+        <p class="error">✗ Should show "Order not found" message</p>
+    </div>
+
+    <div class="test-card">
+        <h3>📝 What Was Fixed:</h3>
+        <ul>
+            <li>✅ Added <code>payment_intent_id</code> column to orders table</li>
+            <li>✅ Checkout page now passes payment intent ID in redirect URL</li>
+            <li>✅ Order creation saves the payment intent ID</li>
+            <li>✅ Success page can now find orders by payment intent</li>
+        </ul>
+    </div>
+
+    <div class="test-card">
+        <h3>🎯 Expected Flow:</h3>
+        <ol>
+            <li>Customer completes payment</li>
+            <li>Payment intent ID is saved with order</li>
+            <li>Redirect to: <code>/order/success?payment_intent=pi_xxxxx</code></li>
+            <li>Success page shows order details ✨</li>
+        </ol>
+    </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+# Task ID: 8
+# Title: Create migration script for products table
+# Status: done
+# Dependencies: 4
+# Priority: high
+# Description: SQL migration to create new products table
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Write CREATE TABLE statement [done]
+### Dependencies: None
+### Description: Full products table creation SQL
+### Details:
+
+
+## 2. Import existing product data [done]
+### Dependencies: None
+### Description: Migrate data from current tables
+### Details:
+
+
+## 3. Create constraints [done]
+### Dependencies: None
+### Description: Add unique, check, and foreign key constraints
+### Details:
+
+
+## 4. Create initial indexes [done]
+### Dependencies: None
+### Description: Add performance indexes
+### Details:
+
+

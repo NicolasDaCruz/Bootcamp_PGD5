@@ -1,0 +1,37 @@
+# Task ID: 21
+# Title: Create vendor management system
+# Status: pending
+# Dependencies: 16
+# Priority: medium
+# Description: Build vendor-specific functionality
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Create vendor profiles table [pending]
+### Dependencies: None
+### Description: Store vendor information
+### Details:
+
+
+## 2. Build vendor dashboard [pending]
+### Dependencies: None
+### Description: Vendor-specific UI
+### Details:
+
+
+## 3. Implement vendor permissions [pending]
+### Dependencies: None
+### Description: Access control for vendors
+### Details:
+
+
+## 4. Add vendor analytics [pending]
+### Dependencies: None
+### Description: Track vendor performance
+### Details:
+
+
