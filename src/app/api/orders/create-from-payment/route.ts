@@ -95,7 +95,17 @@ export async function POST(request: NextRequest) {
         console.log('📦 Detected minimal cart format, converting to full format...');
 
         // Fetch product details for minimal items
-        const productIds = [...new Set(rawCartItems.map((item: any) => item.id))];
+        const productIds = [...new Set(rawCartItems.map((item: any) => {
+          // Extract the actual product UUID if it's a concatenated ID
+          let id = item.id;
+          if (id && id.includes('-') && id.length > 36) {
+            const parts = id.split('-');
+            if (parts.length >= 5) {
+              id = parts.slice(0, 5).join('-');
+            }
+          }
+          return id;
+        }))];
 
         // Use direct API approach
         const { queryProducts } = await import('../../../../../lib/supabase-direct');
@@ -104,12 +114,21 @@ export async function POST(request: NextRequest) {
         const productMap = new Map(products?.map(p => [p.id, p]) || []);
 
         cartItems = rawCartItems.map((item: any) => {
-          const product = productMap.get(item.id);
+          // Extract the actual product UUID for lookup
+          let productId = item.id;
+          if (productId && productId.includes('-') && productId.length > 36) {
+            const parts = productId.split('-');
+            if (parts.length >= 5) {
+              productId = parts.slice(0, 5).join('-');
+            }
+          }
+
+          const product = productMap.get(productId);
           // Extract first image URL from original_image_urls jsonb field
           const imageUrl = product?.original_image_urls?.[0] || null;
           return {
             id: item.id,
-            productId: item.id,
+            productId: productId, // Use the extracted UUID here
             variantId: item.vid,
             quantity: item.q,
             price: item.p,
@@ -320,26 +339,67 @@ export async function POST(request: NextRequest) {
       const { insertOrderItems } = await import('../../../../../lib/supabase-direct');
 
       const orderItems = cartItems.map((item: any) => {
-        const productId = item.productId || item.id;
+        // Extract the actual product UUID from the concatenated ID
+        // ID format: "productId-variantId-size-color-timestamp"
+        const originalId = item.productId || item.id || item.i;
+        let productId = originalId;
+        let variantId = item.variantId || item.vid || item.v || null;
+
+        // UUID regex pattern
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+        // If it's a concatenated ID, extract just the first UUID
+        if (originalId && typeof originalId === 'string') {
+          // Check if the ID contains multiple UUIDs concatenated
+          const uuidMatch = originalId.match(uuidPattern);
+          if (uuidMatch) {
+            // Extract the first UUID (product ID)
+            productId = uuidMatch[0];
+
+            // Try to extract the second UUID (variant ID) if not already provided
+            if (!variantId && originalId.length > 36) {
+              const remainingString = originalId.substring(37); // Skip first UUID + hyphen
+              const variantMatch = remainingString.match(uuidPattern);
+              if (variantMatch) {
+                variantId = variantMatch[0];
+              }
+            }
+          }
+        }
+
+        // Ensure productId is a valid UUID format
+        if (!uuidPattern.test(productId)) {
+          console.error('❌ Invalid product ID format:', productId);
+          // Try to extract from the original concatenated ID
+          if (originalId && originalId.includes('-')) {
+            const firstUuid = originalId.substring(0, 36);
+            if (uuidPattern.test(firstUuid)) {
+              productId = firstUuid;
+            }
+          }
+        }
+
         console.log('📦 Creating order item:', {
-          productId,
+          originalId: item.productId || item.id || item.i,
+          extractedProductId: productId,
+          extractedVariantId: variantId,
           name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          variantId: item.variantId
+          quantity: item.quantity || item.q,
+          price: item.price || item.p,
+          size: item.size || item.s
         });
 
         return {
           order_id: order.id,
           product_id: productId,
-          product_variant_id: item.variantId || null,
-          quantity: item.quantity,
-          unit_price: item.price,
-          total_price: item.price * item.quantity,
+          product_variant_id: variantId,
+          quantity: item.quantity || item.q,
+          unit_price: item.price || item.p,
+          total_price: (item.price || item.p) * (item.quantity || item.q),
           product_name: item.name || 'Unknown Product',
           product_sku: item.sku || `SKU-${productId.substring(0, 8)}`,
-          variant_name: item.size ? 'Size' : null,
-          variant_value: item.size || null
+          variant_name: item.size || item.s ? 'Size' : null,
+          variant_value: item.size || item.s || null
         };
       });
 
@@ -358,17 +418,39 @@ export async function POST(request: NextRequest) {
 
           // Create stock movements for audit trail
           try {
-            const stockMovements = cartItems.map((item: any) => ({
-              product_id: item.productId || item.id,
-              variant_id: item.variantId || null,
-              movement_type: 'sale',
-              quantity: -item.quantity,
-              reason: 'order_fulfillment',
-              reference_type: 'order',
-              reference_id: order.id,
-              reference_number: orderNumber,
-              notes: `Order ${orderNumber} - reservation confirmed`
-            }));
+            const stockMovements = cartItems.map((item: any) => {
+              // Extract product and variant IDs using same logic as order items
+              const originalId = item.productId || item.id || item.i;
+              let productId = originalId;
+              let variantId = item.variantId || item.vid || item.v || null;
+              const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+              if (originalId && typeof originalId === 'string') {
+                const uuidMatch = originalId.match(uuidPattern);
+                if (uuidMatch) {
+                  productId = uuidMatch[0];
+                  if (!variantId && originalId.length > 36) {
+                    const remainingString = originalId.substring(37);
+                    const variantMatch = remainingString.match(uuidPattern);
+                    if (variantMatch) {
+                      variantId = variantMatch[0];
+                    }
+                  }
+                }
+              }
+
+              return {
+                product_id: productId,
+                variant_id: variantId,
+                movement_type: 'sale',
+                quantity: -(item.quantity || item.q),
+                reason: 'order_fulfillment',
+                reference_type: 'order',
+                reference_id: order.id,
+                reference_number: orderNumber,
+                notes: `Order ${orderNumber} - reservation confirmed`
+              };
+            });
 
             const { error: movementError } = await supabaseAdmin
               .from('stock_movements')

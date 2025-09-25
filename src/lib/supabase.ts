@@ -22,4 +22,42 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 console.log('✅ Supabase client initialized successfully');
 
+// Authentication helper functions
+export const signInWithEmail = async (email: string, password: string) => {
+  return await supabase.auth.signInWithPassword({ email, password });
+};
+
+export const signUpWithEmail = async (email: string, password: string, metadata?: any) => {
+  return await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: metadata
+    }
+  });
+};
+
+export const signInWithOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
+  return await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`
+    }
+  });
+};
+
+export const resetPassword = async (email: string) => {
+  return await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/auth/reset-password`
+  });
+};
+
+export const updatePassword = async (password: string) => {
+  return await supabase.auth.updateUser({ password });
+};
+
+export const signOut = async () => {
+  return await supabase.auth.signOut();
+};
+
 export default supabase;

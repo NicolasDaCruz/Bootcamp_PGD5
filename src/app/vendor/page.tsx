@@ -114,9 +114,9 @@ export default function VendorDashboard() {
           name,
           brand,
           sku,
-          status,
+          approval_status,
           price,
-          images,
+          original_image_urls,
           created_at,
           product_variants (
             stock_quantity
@@ -134,11 +134,11 @@ export default function VendorDashboard() {
         name: product.name,
         brand: product.brand,
         sku: product.sku,
-        status: product.status as any,
+        status: product.approval_status as any,
         price: product.price,
         stock_quantity: product.product_variants?.reduce((sum: number, variant: any) => sum + (variant.stock_quantity || 0), 0) || 0,
         created_at: product.created_at,
-        images: product.images,
+        images: product.original_image_urls,
         sales_count: Math.floor(Math.random() * 50) // Simulated for demo
       }));
 
@@ -147,7 +147,7 @@ export default function VendorDashboard() {
       // Calculate stats
       const totalProducts = processedProducts.length;
       const activeProducts = processedProducts.filter(p => p.status === 'approved').length;
-      const pendingApproval = processedProducts.filter(p => p.status === 'pending').length;
+      const pendingApproval = processedProducts.filter(p => p.status === 'pending' || p.status === 'submitted').length;
 
       // Simulated sales and commission data
       const mockStats: VendorStats = {
@@ -194,13 +194,14 @@ export default function VendorDashboard() {
       case 'approved':
         return { color: 'bg-green-100 text-green-800', label: 'Approved' };
       case 'pending':
+      case 'submitted':
         return { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' };
       case 'rejected':
         return { color: 'bg-red-100 text-red-800', label: 'Rejected' };
       case 'draft':
         return { color: 'bg-gray-100 text-gray-800', label: 'Draft' };
       default:
-        return { color: 'bg-gray-100 text-gray-800', label: status };
+        return { color: 'bg-blue-100 text-blue-800', label: status || 'Unknown' };
     }
   };
 

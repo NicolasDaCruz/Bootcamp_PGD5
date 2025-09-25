@@ -10,7 +10,7 @@ import {
   extendStockReservation,
   validateReservation,
   cleanupExpiredReservations
-} from '../../lib/cart-utils';
+} from '../../lib/cart-utils-fixed';
 
 export interface CartItem {
   id: string;

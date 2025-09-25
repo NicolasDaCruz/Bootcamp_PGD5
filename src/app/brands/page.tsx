@@ -100,17 +100,17 @@ export default function BrandsPage() {
 
   const getBrandLogo = (brandName: string) => {
     const brandLogos: Record<string, string> = {
-      'Nike': '✓',
-      'adidas': '⚡',
-      'Jordan': '🏀',
-      'ASICS': 'A',
-      'New Balance': 'N',
-      'Maison Mihara Yasuhiro': 'M',
-      'Crocs': '🐊',
-      'Supreme': 'S',
-      'Timberland': '🌲'
+      'Nike': 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg',
+      'adidas': 'https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg',
+      'Jordan': 'https://logos-world.net/wp-content/uploads/2020/09/Jordan-Logo.png',
+      'ASICS': 'https://upload.wikimedia.org/wikipedia/commons/0/0b/ASICS_Logo.svg',
+      'New Balance': 'https://upload.wikimedia.org/wikipedia/commons/e/ea/New_Balance_logo.svg',
+      'Maison Mihara Yasuhiro': 'https://assets.website-files.com/5ec7d9f13fc8c72bbfc0b5e3/5ec7e05d8a46c38ccb5c43a7_mmy-logo.png',
+      'Crocs': 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Crocs_logo.svg',
+      'Supreme': 'https://upload.wikimedia.org/wikipedia/commons/2/28/Supreme_Logo.svg',
+      'Timberland': 'https://upload.wikimedia.org/wikipedia/commons/7/73/Timberland-logo.svg'
     };
-    return brandLogos[brandName] || brandName.charAt(0);
+    return brandLogos[brandName] || null;
   };
 
   const getBrandColor = (brandName: string) => {
@@ -247,10 +247,19 @@ export default function BrandsPage() {
               >
                 <Link href={`/products?brand=${encodeURIComponent(brand.brand)}`}>
                   <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                    <div className={`h-24 bg-gradient-to-r ${getBrandColor(brand.brand)} flex items-center justify-center`}>
-                      <div className="text-4xl font-black text-white">
-                        {getBrandLogo(brand.brand)}
-                      </div>
+                    <div className={`h-24 bg-gradient-to-r ${getBrandColor(brand.brand)} flex items-center justify-center p-4`}>
+                      {getBrandLogo(brand.brand) ? (
+                        <img
+                          src={getBrandLogo(brand.brand)!}
+                          alt={`${brand.brand} Logo`}
+                          className="h-16 w-auto object-contain filter invert brightness-0 contrast-200"
+                          style={{ maxWidth: '100%', maxHeight: '100%' }}
+                        />
+                      ) : (
+                        <div className="text-4xl font-black text-white">
+                          {brand.brand.charAt(0)}
+                        </div>
+                      )}
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 transition-colors">

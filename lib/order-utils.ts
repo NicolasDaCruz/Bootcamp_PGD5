@@ -56,6 +56,12 @@ export interface OrderItem {
   unit_price: number;
   total_price: number;
   created_at: string;
+  product?: {
+    id: string;
+    name: string;
+    brand?: string;
+    original_image_urls?: string[];
+  };
 }
 
 // Create order with new schema (used by payment processing)
@@ -97,6 +103,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | '
       tracking_number: orderData.tracking_number,
       payment_status: orderData.payment_status,
       payment_method: orderData.payment_method,
+      payment_intent_id: (orderData as any).payment_intent_id, // Add payment intent ID
       confirmed_at: orderData.confirmed_at,
       shipped_at: orderData.shipped_at,
       delivered_at: orderData.delivered_at,
@@ -295,7 +302,15 @@ export async function getOrderWithItems(orderId: string): Promise<{
 
     const { data: items, error: itemsError } = await supabase
       .from('order_items')
-      .select('*')
+      .select(`
+        *,
+        product:products(
+          id,
+          name,
+          brand,
+          original_image_urls
+        )
+      `)
       .eq('order_id', orderId);
 
     if (itemsError) {
@@ -314,6 +329,8 @@ export async function getOrderWithItems(orderId: string): Promise<{
 // Get user orders
 export async function getUserOrders(userId: string): Promise<Order[]> {
   try {
+    console.log(`🔍 Fetching orders for user ID: ${userId}`);
+
     // First try to get orders by customer_id
     const { data: orders, error } = await supabase
       .from('orders')
@@ -322,18 +339,18 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching user orders by customer_id:', error);
+      console.error('❌ Error fetching user orders by customer_id:', error);
       return [];
     }
 
     // If we found orders, return them
     if (orders && orders.length > 0) {
-      console.log(`Found ${orders.length} orders for customer_id: ${userId}`);
+      console.log(`✅ Found ${orders.length} orders for customer_id: ${userId}`);
       return orders;
     }
 
     // Fallback: try to get user's email and fetch orders by email
-    console.log('No orders found by customer_id, trying email fallback...');
+    console.log('⚠️ No orders found by customer_id, trying email fallback...');
 
     const { data: userData, error: userError } = await supabase
       .from('users')
@@ -342,9 +359,11 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
       .single();
 
     if (userError || !userData) {
-      console.warn('Could not fetch user email for fallback order search:', userError);
+      console.warn('❌ Could not fetch user email for fallback order search:', userError);
       return [];
     }
+
+    console.log(`🔍 Looking for orders with email: ${userData.email}`);
 
     const { data: emailOrders, error: emailError } = await supabase
       .from('orders')
@@ -353,18 +372,37 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
       .order('created_at', { ascending: false });
 
     if (emailError) {
-      console.error('Error fetching user orders by email:', emailError);
+      console.error('❌ Error fetching user orders by email:', emailError);
       return [];
     }
 
     if (emailOrders && emailOrders.length > 0) {
-      console.log(`Found ${emailOrders.length} orders for email: ${userData.email}`);
+      console.log(`✅ Found ${emailOrders.length} orders for email: ${userData.email}`);
+
+      // Update the customer_id for these orders to link them properly for future queries
+      for (const order of emailOrders) {
+        if (!order.customer_id) {
+          try {
+            await supabase
+              .from('orders')
+              .update({ customer_id: userId })
+              .eq('id', order.id);
+            console.log(`🔗 Linked order ${order.order_number} to customer_id: ${userId}`);
+          } catch (updateError) {
+            console.warn('⚠️ Could not update customer_id for order:', order.id, updateError);
+          }
+        }
+      }
+
+      return emailOrders.map(order => ({ ...order, customer_id: userId }));
+    } else {
+      console.log(`⚠️ No orders found for email: ${userData.email}`);
     }
 
-    return emailOrders || [];
+    return [];
 
   } catch (error) {
-    console.error('Error fetching user orders:', error);
+    console.error('💥 Error fetching user orders:', error);
     return [];
   }
 }

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircle, Package, Truck, CreditCard, ArrowRight, Download, Mail } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getOrderByPaymentIntent, getOrderConfirmationData } from '../../../../lib/order-utils';
 import { Order, OrderConfirmationData } from '../../../../lib/order-utils';
 import { useCart } from '../../../contexts/CartContext';
@@ -175,18 +176,28 @@ export default function OrderSuccessPage() {
             <div className="space-y-4">
               {order.items.map((item) => (
                 <div key={`${item.product_id}-${item.product_variant_id}`} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                  <div className="h-16 w-16 bg-slate-200 dark:bg-slate-600 rounded-lg flex items-center justify-center">
-                    <Package className="h-8 w-8 text-slate-400" />
+                  <div className="h-16 w-16 bg-slate-200 dark:bg-slate-600 rounded-lg flex items-center justify-center overflow-hidden">
+                    {item.product?.original_image_urls?.[0] ? (
+                      <Image
+                        src={item.product.original_image_urls[0]}
+                        alt={item.product_name || 'Product'}
+                        width={64}
+                        height={64}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <Package className="h-8 w-8 text-slate-400" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900 dark:text-white">{item.product_name}</h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {item.variant_name} • Qty: {item.quantity}
+                      Size {item.variant_value} • Qty: {item.quantity}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-slate-900 dark:text-white">
-                      ${(item.price * item.quantity / 100).toFixed(2)}
+                      ${(item.unit_price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -196,19 +207,19 @@ export default function OrderSuccessPage() {
             <div className="border-t border-slate-200 dark:border-slate-700 mt-6 pt-6 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600 dark:text-slate-400">Subtotal</span>
-                <span className="text-slate-900 dark:text-white">${(order.order.subtotal / 100).toFixed(2)}</span>
+                <span className="text-slate-900 dark:text-white">${parseFloat(order.order.subtotal || '0').toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600 dark:text-slate-400">Shipping</span>
-                <span className="text-slate-900 dark:text-white">${(order.order.shipping_cost / 100).toFixed(2)}</span>
+                <span className="text-slate-900 dark:text-white">${parseFloat(order.order.shipping_amount || '0').toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600 dark:text-slate-400">Tax</span>
-                <span className="text-slate-900 dark:text-white">${(order.order.tax_amount / 100).toFixed(2)}</span>
+                <span className="text-slate-900 dark:text-white">${parseFloat(order.order.tax_amount || '0').toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold border-t border-slate-200 dark:border-slate-700 pt-2">
                 <span className="text-slate-900 dark:text-white">Total</span>
-                <span className="text-slate-900 dark:text-white">${(order.order.total_amount / 100).toFixed(2)}</span>
+                <span className="text-slate-900 dark:text-white">${parseFloat(order.order.total || '0').toFixed(2)}</span>
               </div>
             </div>
           </motion.div>
@@ -225,11 +236,10 @@ export default function OrderSuccessPage() {
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Shipping Address</h3>
               </div>
               <div className="text-slate-600 dark:text-slate-400">
-                <p className="font-medium text-slate-900 dark:text-white">{order.shippingAddress.full_name}</p>
-                <p>{order.shippingAddress.address_line_1}</p>
-                {order.shippingAddress.address_line_2 && <p>{order.shippingAddress.address_line_2}</p>}
-                <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postal_code}</p>
-                <p>{order.shippingAddress.country}</p>
+                <p className="font-medium text-slate-900 dark:text-white">{order.order.shipping_full_name}</p>
+                <p>{order.order.shipping_address}</p>
+                <p>{order.order.shipping_city}, {order.order.shipping_postal_code}</p>
+                <p>{order.order.shipping_country}</p>
               </div>
             </div>
 
@@ -240,7 +250,7 @@ export default function OrderSuccessPage() {
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Payment Method</h3>
               </div>
               <div className="text-slate-600 dark:text-slate-400">
-                <p className="capitalize">{order.order.payment_method}</p>
+                <p className="capitalize">{order.order.payment_method || 'card'}</p>
                 <p className="text-sm text-green-600 dark:text-green-400 font-medium">✓ Payment Confirmed</p>
               </div>
             </div>
@@ -253,7 +263,7 @@ export default function OrderSuccessPage() {
               </div>
               <div className="space-y-2">
                 <p className="text-green-600 dark:text-green-400 font-medium capitalize">
-                  {order.order.status}
+                  {order.order.status || 'confirmed'}
                 </p>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   You will receive email updates as your order is processed and shipped.

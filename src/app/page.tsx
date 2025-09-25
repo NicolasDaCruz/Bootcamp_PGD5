@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import HeroSection from '../components/HeroSection';
 import FeaturedProducts from '../components/FeaturedProducts';
+import SustainabilitySection from '../components/SustainabilitySection';
 import BrandsCarousel from '../components/BrandsCarousel';
 import NewsletterSection from '../components/NewsletterSection';
 
@@ -66,6 +67,10 @@ export default function Home() {
 
       <motion.div variants={sectionVariants}>
         <FeaturedProducts />
+      </motion.div>
+
+      <motion.div variants={sectionVariants}>
+        <SustainabilitySection />
       </motion.div>
 
       <motion.div variants={sectionVariants}>

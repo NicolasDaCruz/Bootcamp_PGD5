@@ -55,106 +55,51 @@ export default function LoginPage() {
         return;
       }
 
-      // Sign in with Supabase
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Use server-side login API to bypass CORS issues
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      console.log('📈 Auth response:', {
-        hasUser: !!data.user,
-        userId: data.user?.id,
-        hasSession: !!data.session,
-        authError: authError?.message
+      const result = await response.json();
+
+      console.log('📈 Server auth response:', {
+        success: result.success,
+        hasUser: !!result.user,
+        hasProfile: !!result.profile,
+        error: result.error
       });
 
-      if (authError) {
-        console.error('❌ Authentication failed:', authError);
-        setError(authError.message);
+      if (!result.success) {
+        console.error('❌ Authentication failed:', result.error);
+        setError(result.error);
         return;
       }
 
-      if (data.user) {
-        // Wait briefly for auth session to be established
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Retry mechanism for RLS timing issues
-        let userData = null;
-        let userError = null;
-        let retries = 3;
-
-        while (retries > 0 && !userData) {
-          console.log(`🔄 Fetching user data (retry ${4-retries}/3)...`);
-
-          const result = await supabase
-            .from('users')
-            .select('role, full_name')
-            .eq('id', data.user.id)
-            .single();
-
-          userData = result.data;
-          userError = result.error;
-
-          console.log('📊 User data fetch result:', {
-            hasData: !!userData,
-            userData,
-            error: userError?.message,
-            errorCode: userError?.code,
-            retriesLeft: retries - 1
-          });
-
-          if (userError && userError.code === 'PGRST116' && retries > 1) {
-            console.log('⏳ RLS blocking, retrying in 200ms...');
-            // If RLS is blocking, wait and retry
-            await new Promise(resolve => setTimeout(resolve, 200));
-            retries--;
-          } else {
-            break;
-          }
-        }
-
-        if (userError) {
-          console.error('❌ Error fetching user data after retries:', userError);
-          // If no user record exists, create one with default role
-          const { error: insertError } = await supabase
-            .from('users')
-            .insert({
-              id: data.user.id,
-              email: data.user.email,
-              full_name: data.user.user_metadata?.full_name || '',
-              role: 'client'
-            });
-
-          if (!insertError) {
-            router.push('/');
-          }
-          return;
-        }
+      if (result.user && result.profile) {
+        console.log(`🔀 User role detected: ${result.profile.role}`);
 
         // Redirect based on role
-        console.log('🎯 Starting redirect logic...', { userData });
-
-        if (userData) {
-          console.log(`🔀 User role detected: ${userData.role}`);
-
-          switch (userData.role) {
-            case 'admin':
-              console.log('👑 Redirecting to admin dashboard...');
-              router.push('/admin');
-              break;
-            case 'vendeur':
-              console.log('🏪 Redirecting to vendor dashboard...');
-              router.push('/vendor');
-              break;
-            default:
-              console.log('🏠 Redirecting to homepage (default)...');
-              router.push('/');
-              break;
-          }
-        } else {
-          console.log('⚠️ No user data found, redirecting to homepage...');
-          router.push('/');
+        switch (result.profile.role) {
+          case 'admin':
+            console.log('👑 Redirecting to admin dashboard...');
+            router.push('/admin');
+            break;
+          case 'vendeur':
+            console.log('🏪 Redirecting to vendor dashboard...');
+            router.push('/vendor');
+            break;
+          default:
+            console.log('🏠 Redirecting to homepage (default)...');
+            router.push('/');
+            break;
         }
+      } else {
+        console.log('⚠️ No user data found, redirecting to homepage...');
+        router.push('/');
       }
     } catch (error) {
       console.error('Login error:', error);

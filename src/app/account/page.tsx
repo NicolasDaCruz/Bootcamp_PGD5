@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { usePrivacy } from '@/contexts/PrivacyContext';
-import { activityLogger } from '@/lib/activity-logger';
+import { activityLogger, logLogout } from '@/lib/activity-logger';
 import type { User as UserType, UserActivityLog, UserPreferences } from '@/types/database';
 
 interface TabProps {
@@ -187,7 +187,7 @@ export default function AccountPage() {
   };
 
   const handleLogout = async () => {
-    await activityLogger.logLogout({
+    await logLogout({
       logout_method: 'manual',
       session_duration: 'unknown'
     });

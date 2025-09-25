@@ -39,6 +39,9 @@ const nextConfig = {
         pathname: '/**',
       }
     ],
+    // Allow SVG images for placeholders
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"
   },
   async headers() {
     return [

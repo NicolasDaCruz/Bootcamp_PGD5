@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updatePaymentIntent, formatAmountForStripe, calculateTax } from '../../../../../lib/stripe';
-import { validateStockLevels } from '../../../../../lib/cart-utils';
+import { validateStockLevels } from '../../../../../lib/cart-utils-fixed';
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createPaymentIntent, formatAmountForStripe, calculateTax } from '../../../../../lib/stripe';
-import { validateStockLevels, realtimeStockCheck } from '../../../../../lib/cart-utils';
+import { validateStockLevels, realtimeStockCheck } from '../../../../../lib/cart-utils-fixed';
 import { supabase } from '../../../../lib/supabase';
 
 export async function POST(request: NextRequest) {
