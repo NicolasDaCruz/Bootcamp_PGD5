@@ -12,7 +12,12 @@ import {
   Search,
   Filter,
   Download,
-  Upload
+  Upload,
+  Edit,
+  Save,
+  X,
+  Plus,
+  Minus
 } from 'lucide-react';
 
 interface StockItem {
@@ -56,10 +61,58 @@ export default function StockManagementDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(100); // Increased to show more items per page
 
+  // Inline editing states
+  const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [newStockValue, setNewStockValue] = useState<number>(0);
+  const [quickUpdateLoading, setQuickUpdateLoading] = useState<string | null>(null);
+
   useEffect(() => {
     fetchStockData();
     fetchRecentMovements();
   }, []);
+
+  // Filter variants to show only one per product+size combination (same logic as product page)
+  const filterToPrimaryVariants = (variants: any[]) => {
+    const variantsByProductSize = new Map<string, any[]>();
+
+    // Group variants by product_id + size combination
+    variants.forEach(variant => {
+      const sizeKey = variant.eu_size || variant.us_size || 'no-size';
+      const key = `${variant.product_id}-${sizeKey}`;
+
+      if (!variantsByProductSize.has(key)) {
+        variantsByProductSize.set(key, []);
+      }
+      variantsByProductSize.get(key)!.push(variant);
+    });
+
+    // Select one variant per product+size combination
+    const selectedVariants: any[] = [];
+
+    variantsByProductSize.forEach(variantsForSize => {
+      // First, try to find primary variant
+      const primaryVariant = variantsForSize.find(v => v.is_primary_variant === true);
+
+      if (primaryVariant) {
+        selectedVariants.push(primaryVariant);
+      } else {
+        // If no primary variant, select the one with highest stock
+        // If stock is tied, select the most recently created one
+        const selectedVariant = variantsForSize.reduce((best, current) => {
+          if (current.stock_quantity > best.stock_quantity) {
+            return current;
+          } else if (current.stock_quantity === best.stock_quantity) {
+            // If stock is the same, prefer the more recent one
+            return new Date(current.created_at) > new Date(best.created_at) ? current : best;
+          }
+          return best;
+        });
+        selectedVariants.push(selectedVariant);
+      }
+    });
+
+    return selectedVariants;
+  };
 
   const fetchStockData = async () => {
     try {
@@ -67,7 +120,7 @@ export default function StockManagementDashboard() {
 
       // Fetch all products from both tables
       const [variantsResponse, productsResponse, sneakersResponse] = await Promise.all([
-        // Get all product variants with their product info
+        // Get all product variants with their product info, prioritizing primary variants
         supabase
           .from('product_variants')
           .select(`
@@ -80,6 +133,8 @@ export default function StockManagementDashboard() {
             reserved_quantity,
             computed_available_stock,
             price_adjustment,
+            is_primary_variant,
+            created_at,
             products!inner (
               id,
               name,
@@ -109,12 +164,15 @@ export default function StockManagementDashboard() {
       if (variantsResponse.error) throw variantsResponse.error;
       if (productsResponse.error) throw productsResponse.error;
 
+      // Filter variants to show only one per product+size combination (matching product page logic)
+      const filteredVariants = filterToPrimaryVariants(variantsResponse.data || []);
+
       // Create a set of product IDs that have variants
-      const productsWithVariants = new Set(variantsResponse.data?.map(v => v.product_id) || []);
+      const productsWithVariants = new Set(filteredVariants.map(v => v.product_id));
       const allProductIds = new Set(productsResponse.data?.map(p => p.id) || []);
 
       // Format variants data
-      const formattedStock = variantsResponse.data?.map(item => {
+      const formattedStock = filteredVariants.map(item => {
         const sizeDisplay = item.eu_size ?
           `EU ${item.eu_size}${item.us_size ? ` / US ${item.us_size}` : ''}` :
           'One Size';
@@ -184,7 +242,7 @@ export default function StockManagementDashboard() {
       // Combine all items
       const allItems = [...formattedStock, ...productPlaceholders, ...sneakerPlaceholders];
 
-      console.log(`Loaded inventory: ${formattedStock.length} variants, ${productPlaceholders.length} products without variants, ${sneakerPlaceholders.length} sneakers not synced`);
+      console.log(`Loaded inventory: ${formattedStock.length} primary variants (${variantsResponse.data?.length} total), ${productPlaceholders.length} products without variants, ${sneakerPlaceholders.length} sneakers not synced`);
 
       setStockItems(allItems);
       setCurrentPage(1);
@@ -219,11 +277,15 @@ export default function StockManagementDashboard() {
         return;
       }
 
+      // Calculate available stock (total stock - reserved)
+      const availableStock = newQuantity - item.reserved_quantity;
+
       // Update the product variant stock
       const { error: updateError } = await supabase
         .from('product_variants')
         .update({
           stock_quantity: newQuantity,
+          computed_available_stock: availableStock,
           updated_at: new Date().toISOString()
         })
         .eq('id', item.id);
@@ -234,10 +296,16 @@ export default function StockManagementDashboard() {
       const { error: movementError } = await supabase
         .from('stock_movements')
         .insert({
-          product_variant_id: item.id,
+          product_id: item.product_id,
+          variant_id: item.id,
           movement_type: quantity > 0 ? 'adjustment_in' : 'adjustment_out',
           quantity: Math.abs(quantity),
+          quantity_before: item.stock_quantity,
+          quantity_after: newQuantity,
           reason: reason,
+          reference_type: 'admin_adjustment',
+          status: 'completed',
+          movement_date: new Date().toISOString(),
           created_at: new Date().toISOString()
         });
 
@@ -255,6 +323,89 @@ export default function StockManagementDashboard() {
     } catch (error) {
       console.error('Error adjusting stock:', error);
       alert('Failed to adjust stock');
+    }
+  };
+
+  // Quick stock update functions
+  const startQuickEdit = (item: StockItem) => {
+    setEditingItem(item.id);
+    setNewStockValue(item.stock_quantity);
+  };
+
+  const cancelQuickEdit = () => {
+    setEditingItem(null);
+    setNewStockValue(0);
+  };
+
+  const quickAdjustStock = async (item: StockItem, adjustment: number) => {
+    const newQuantity = item.stock_quantity + adjustment;
+    await quickUpdateStock(item, newQuantity);
+  };
+
+  const quickUpdateStock = async (item: StockItem, newQuantity: number) => {
+    if (newQuantity < 0) {
+      alert('Stock cannot be negative');
+      return;
+    }
+
+    if (newQuantity === item.stock_quantity) {
+      cancelQuickEdit();
+      return;
+    }
+
+    try {
+      setQuickUpdateLoading(item.id);
+
+      // Update the product variant stock and computed available stock
+      const availableStock = newQuantity - item.reserved_quantity;
+      const { error: updateError } = await supabase
+        .from('product_variants')
+        .update({
+          stock_quantity: newQuantity,
+          computed_available_stock: availableStock,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', item.id);
+
+      if (updateError) throw updateError;
+
+      // Record the stock movement
+      const difference = newQuantity - item.stock_quantity;
+      const { error: movementError } = await supabase
+        .from('stock_movements')
+        .insert({
+          product_id: item.product_id,
+          variant_id: item.id,
+          movement_type: difference > 0 ? 'adjustment_in' : 'adjustment_out',
+          quantity: Math.abs(difference),
+          quantity_before: item.stock_quantity,
+          quantity_after: newQuantity,
+          reason: `Quick update: Set stock to ${newQuantity}`,
+          reference_type: 'admin_adjustment',
+          status: 'completed',
+          movement_date: new Date().toISOString(),
+          created_at: new Date().toISOString()
+        });
+
+      if (movementError) {
+        console.error('Error recording stock movement:', movementError);
+        // Continue even if movement recording fails
+      }
+
+      // Update local state
+      setStockItems(prev => prev.map(stockItem =>
+        stockItem.id === item.id
+          ? { ...stockItem, stock_quantity: newQuantity, available_quantity: newQuantity - stockItem.reserved_quantity }
+          : stockItem
+      ));
+
+      cancelQuickEdit();
+      fetchRecentMovements();
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      alert('Failed to update stock');
+    } finally {
+      setQuickUpdateLoading(null);
     }
   };
 
@@ -479,15 +630,83 @@ export default function StockManagementDashboard() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {item.sku === 'NO-VARIANTS' ? (
-                      <span className="text-gray-400">No Variants</span>
+                    {item.sku === 'NO-VARIANTS' || item.sku === 'NOT-IN-PRODUCTS' ? (
+                      <span className="text-gray-400">
+                        {item.sku === 'NO-VARIANTS' ? 'No Variants' : 'Not Synced'}
+                      </span>
                     ) : (
-                      <button
-                        onClick={() => setSelectedItem(item)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Adjust
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {editingItem === item.id ? (
+                          <>
+                            <input
+                              type="number"
+                              value={newStockValue}
+                              onChange={(e) => setNewStockValue(parseInt(e.target.value) || 0)}
+                              className="w-20 px-2 py-1 border rounded text-center"
+                              min="0"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  quickUpdateStock(item, newStockValue);
+                                } else if (e.key === 'Escape') {
+                                  cancelQuickEdit();
+                                }
+                              }}
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => quickUpdateStock(item, newStockValue)}
+                              disabled={quickUpdateLoading === item.id}
+                              className="text-green-600 hover:text-green-700 disabled:opacity-50"
+                              title="Save (Enter)"
+                            >
+                              <Save className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={cancelQuickEdit}
+                              disabled={quickUpdateLoading === item.id}
+                              className="text-gray-600 hover:text-gray-700 disabled:opacity-50"
+                              title="Cancel (Esc)"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </>
+                        ) : (
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => quickAdjustStock(item, 1)}
+                                disabled={quickUpdateLoading === item.id}
+                                className="text-green-600 hover:text-green-700 disabled:opacity-50 p-1 rounded border"
+                                title="Add 1"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => quickAdjustStock(item, -1)}
+                                disabled={quickUpdateLoading === item.id || item.stock_quantity === 0}
+                                className="text-red-600 hover:text-red-700 disabled:opacity-50 p-1 rounded border"
+                                title="Remove 1"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => startQuickEdit(item)}
+                                className="text-blue-600 hover:text-blue-700 p-1 rounded border"
+                                title="Set Exact Value"
+                              >
+                                <Edit className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => setSelectedItem(item)}
+                              className="text-indigo-600 hover:text-indigo-700 text-xs"
+                              title="Advanced Adjustment"
+                            >
+                              Advanced
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </td>
                 </tr>

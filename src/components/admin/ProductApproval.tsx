@@ -21,7 +21,8 @@ interface PendingProduct {
   price: number;
   vendor_id: string;
   vendor_name?: string;
-  images: string[];
+  original_image_urls: string[] | null;
+  images?: string[]; // fallback for compatibility
   category: string;
   brand: string;
   sizes: any[];
@@ -37,6 +38,19 @@ export default function ProductApproval() {
   const [processing, setProcessing] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
+
+  // Helper function to safely get product images
+  const getProductImages = (product: PendingProduct): string[] => {
+    // Try original_image_urls first (primary field)
+    if (product.original_image_urls && Array.isArray(product.original_image_urls) && product.original_image_urls.length > 0) {
+      return product.original_image_urls;
+    }
+    // Fallback to images field for compatibility
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      return product.images;
+    }
+    return [];
+  };
 
   useEffect(() => {
     fetchPendingProducts();
@@ -195,19 +209,29 @@ export default function ProductApproval() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pendingProducts.map((product) => (
             <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-              {product.images[0] && (
-                <div className="relative h-48">
-                  <Image
-                    src={product.images[0]}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute top-2 right-2">
-                    {getStatusBadge(product.approval_status)}
+{(() => {
+                const productImages = getProductImages(product);
+                return productImages.length > 0 ? (
+                  <div className="relative h-48">
+                    <Image
+                      src={productImages[0]}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute top-2 right-2">
+                      {getStatusBadge(product.approval_status)}
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="relative h-48 bg-gray-100 flex items-center justify-center">
+                    <Package className="w-12 h-12 text-gray-400" />
+                    <div className="absolute top-2 right-2">
+                      {getStatusBadge(product.approval_status)}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="p-4 space-y-3">
                 <div>
@@ -294,16 +318,28 @@ export default function ProductApproval() {
               <div>
                 <h4 className="font-semibold mb-2">Product Images</h4>
                 <div className="grid grid-cols-2 gap-2">
-                  {selectedProduct.images.map((img, idx) => (
-                    <div key={idx} className="relative h-32">
-                      <Image
-                        src={img}
-                        alt={`Product ${idx + 1}`}
-                        fill
-                        className="object-cover rounded"
-                      />
-                    </div>
-                  ))}
+                  {(() => {
+                    const selectedImages = getProductImages(selectedProduct);
+                    return selectedImages.length > 0 ? (
+                      selectedImages.map((img, idx) => (
+                        <div key={idx} className="relative h-32">
+                          <Image
+                            src={img}
+                            alt={`Product ${idx + 1}`}
+                            fill
+                            className="object-cover rounded"
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-2 h-32 bg-gray-100 flex items-center justify-center rounded">
+                        <div className="text-center">
+                          <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-500">No images available</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 

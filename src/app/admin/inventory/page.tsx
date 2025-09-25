@@ -24,17 +24,18 @@ interface InventoryItem {
   product_id: string;
   product_name: string;
   product_brand: string;
-  sku: string;
-  variant_name?: string;
-  eu_size?: number;
-  us_size?: number;
-  size_display?: string;
+  product_model: string;
+  colorway?: string;
+  size: number | null;
+  size_display: string;
+  skus: string[];
   stock_quantity: number;
   reserved_quantity: number;
   available_quantity: number;
-  reorder_point: number;
   price: number;
   last_updated: string;
+  is_displayed: boolean;
+  consolidated_count: number; // Number of duplicate entries consolidated
 }
 
 interface StockAlert {
@@ -95,75 +96,88 @@ export default function AdminInventory() {
     try {
       setLoading(true);
 
-      // Load inventory with product information
-      const { data: variants, error: variantsError } = await supabase
-        .from('product_variants')
-        .select(`
-          id,
-          sku,
-          name,
-          eu_size,
-          us_size,
-          stock_quantity,
-          reserved_quantity,
-          price_adjustment,
-          updated_at,
-          product_id,
-          products!inner (
-            id,
-            name,
-            brand,
-            price,
-            low_stock_threshold
-          )
-        `)
-        .eq('variant_type', 'size')
-        .order('stock_quantity', { ascending: true });
+      // Get ALL sneakers that are in stock - no limit to get complete inventory
+      const { data: displayedSneakers, error: sneakersError } = await supabase
+        .from('sneakers')
+        .select('*')
+        .eq('in_stock', true);
+        // Removed limit to get all products
 
-      if (variantsError) throw variantsError;
+      if (sneakersError) throw sneakersError;
 
-      // Transform data
-      const inventoryItems: InventoryItem[] = (variants || []).map((variant) => {
-        const sizeDisplay = variant.eu_size ? `EU ${variant.eu_size}` :
-                           variant.us_size ? `US ${variant.us_size}` :
-                           variant.name || 'Default';
+      if (!displayedSneakers || displayedSneakers.length === 0) {
+        setInventory([]);
+        setAlerts([]);
+        setLoading(false);
+        return;
+      }
+
+      // Group sneakers by product AND size to consolidate duplicates
+      const groupedProducts = new Map<string, any>();
+
+      displayedSneakers.forEach((sneaker: any) => {
+        // Group by brand, model AND size to consolidate duplicates
+        const productKey = `${sneaker.brand}_${sneaker.model}_${sneaker.size || 'onesize'}_${sneaker.colorway || 'default'}`;
+
+        if (!groupedProducts.has(productKey)) {
+          groupedProducts.set(productKey, {
+            ...sneaker,
+            skus: [sneaker.sku],
+            prices: [parseFloat(sneaker.price) || 0],
+            count: 1
+          });
+        } else {
+          const existing = groupedProducts.get(productKey);
+          existing.skus.push(sneaker.sku);
+          existing.prices.push(parseFloat(sneaker.price) || 0);
+          existing.count += 1;
+        }
+      });
+
+      // Transform grouped data to inventory format - one row per product/size
+      const inventoryItems: InventoryItem[] = Array.from(groupedProducts.values()).map((group: any) => {
+        const avgPrice = group.prices.reduce((a: number, b: number) => a + b, 0) / group.prices.length;
+        const sizeDisplay = group.size ? `EU ${group.size}` : 'One Size';
+
+        // Default stock of 10 per entry, multiply by count of duplicates
+        const stockPerEntry = 10;
+        const totalStock = stockPerEntry * group.count;
 
         return {
-          id: variant.id,
-          product_id: variant.product_id,
-          product_name: variant.products.name,
-          product_brand: variant.products.brand,
-          sku: variant.sku,
-          variant_name: variant.name,
-          eu_size: variant.eu_size,
-          us_size: variant.us_size,
+          id: group.id,
+          product_id: group.id,
+          product_name: `${group.brand} ${group.model}`,
+          product_brand: group.brand,
+          product_model: group.model,
+          colorway: group.colorway,
+          size: group.size,
           size_display: sizeDisplay,
-          stock_quantity: variant.stock_quantity || 0,
-          reserved_quantity: variant.reserved_quantity || 0,
-          available_quantity: (variant.stock_quantity || 0) - (variant.reserved_quantity || 0),
-          reorder_point: variant.products.low_stock_threshold || 10,
-          price: variant.products.price + (variant.price_adjustment || 0),
-          last_updated: variant.updated_at
+          skus: group.skus,
+          stock_quantity: totalStock,
+          reserved_quantity: 0,
+          available_quantity: totalStock,
+          price: avgPrice,
+          last_updated: group.updated_at || new Date().toISOString(),
+          is_displayed: true,
+          consolidated_count: group.count
         };
       });
 
       setInventory(inventoryItems);
 
       // Generate alerts based on inventory levels
+      const reorderPoint = 5;
       const stockAlerts: StockAlert[] = inventoryItems
-        .filter(item =>
-          item.stock_quantity <= item.reorder_point ||
-          item.stock_quantity === 0
-        )
+        .filter(item => item.stock_quantity <= reorderPoint || item.stock_quantity === 0)
         .map(item => ({
           id: item.id,
           type: item.stock_quantity === 0 ? 'out_of_stock' : 'low_stock',
           product_name: item.product_name,
           variant_name: item.size_display,
           current_stock: item.stock_quantity,
-          threshold: item.reorder_point,
+          threshold: reorderPoint,
           severity: item.stock_quantity === 0 ? 'critical' :
-                   item.stock_quantity <= item.reorder_point / 2 ? 'high' : 'medium',
+                   item.stock_quantity <= reorderPoint / 2 ? 'high' : 'medium',
           created_at: new Date().toISOString()
         }));
 
@@ -194,17 +208,8 @@ export default function AdminInventory() {
 
       if (error) throw error;
 
-      // Update local state
-      setInventory(inventory.map(item =>
-        item.id === selectedItem.id
-          ? {
-              ...item,
-              stock_quantity: newStock,
-              available_quantity: newStock - item.reserved_quantity,
-              last_updated: new Date().toISOString()
-            }
-          : item
-      ));
+      // Reload inventory to reflect changes
+      await loadInventoryData();
 
       // Close modal
       setShowAdjustModal(false);
@@ -228,15 +233,20 @@ export default function AdminInventory() {
       lowStockItems: alerts.filter(a => a.type === 'low_stock').length,
       outOfStockItems: alerts.filter(a => a.type === 'out_of_stock').length,
       inventory: inventory.map(item => ({
-        sku: item.sku,
         product_name: item.product_name,
         brand: item.product_brand,
-        size: item.size_display,
-        stock_quantity: item.stock_quantity,
-        available_quantity: item.available_quantity,
-        reserved_quantity: item.reserved_quantity,
-        reorder_point: item.reorder_point,
-        price: item.price
+        model: item.product_model,
+        sizes: item.sizes.map(s => ({
+          size: `EU ${s.size}`,
+          sku: s.sku,
+          stock: s.stock_quantity,
+          available: s.available_quantity,
+          reserved: s.reserved_quantity,
+          price: s.price
+        })),
+        total_stock: item.total_stock,
+        total_available: item.total_available,
+        average_price: item.average_price
       }))
     };
 
@@ -252,9 +262,10 @@ export default function AdminInventory() {
   };
 
   const getStockStatus = (item: InventoryItem) => {
+    const reorderPoint = 5;
     if (item.stock_quantity === 0) {
       return { status: 'Out of Stock', color: 'bg-red-100 text-red-800' };
-    } else if (item.stock_quantity <= item.reorder_point) {
+    } else if (item.stock_quantity <= reorderPoint) {
       return { status: 'Low Stock', color: 'bg-yellow-100 text-yellow-800' };
     } else if (item.stock_quantity >= 50) { // High stock threshold
       return { status: 'High Stock', color: 'bg-blue-100 text-blue-800' };
@@ -278,9 +289,10 @@ export default function AdminInventory() {
   const filteredInventory = inventory.filter(item => {
     const matchesSearch = !searchTerm ||
       item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.product_brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.size_display && item.size_display.toLowerCase().includes(searchTerm.toLowerCase()));
+      item.product_model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.skus.some(sku => sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      item.size_display.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory = categoryFilter === 'all' || categoryFilter === 'sneakers'; // All are sneakers for now
 
@@ -355,8 +367,8 @@ export default function AdminInventory() {
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
-                <p className="text-gray-600 mt-1">Manage stock levels by product size</p>
+                <h1 className="text-3xl font-bold text-gray-900">Store Inventory Management</h1>
+                <p className="text-gray-600 mt-1">Showing only products displayed on the store</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -386,8 +398,9 @@ export default function AdminInventory() {
                 <Package className="w-6 h-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Variants</p>
+                <p className="text-sm font-medium text-gray-600">Displayed Products</p>
                 <p className="text-2xl font-bold text-gray-900">{inventory.length}</p>
+                <p className="text-xs text-gray-500">Only showing store inventory</p>
               </div>
             </div>
           </div>
@@ -535,7 +548,7 @@ export default function AdminInventory() {
                     Size
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    SKU
+                    SKU(s)
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Stock
@@ -544,10 +557,10 @@ export default function AdminInventory() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Value
+                    Price
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Last Updated
+                    Value
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -559,12 +572,19 @@ export default function AdminInventory() {
                   const { status, color } = getStockStatus(item);
 
                   return (
-                    <tr key={item.id} className="hover:bg-gray-50">
+                    <tr key={`${item.id}_${item.size}`} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{item.product_name}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">{item.product_name}</span>
+                            {item.consolidated_count > 1 && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800" title={`${item.consolidated_count} duplicate entries consolidated`}>
+                                x{item.consolidated_count}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-sm text-gray-500">
-                            {item.product_brand}
+                            {item.colorway || 'Default'}
                           </div>
                         </div>
                       </td>
@@ -573,14 +593,26 @@ export default function AdminInventory() {
                           {item.size_display}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
-                        {item.sku}
+                      <td className="px-6 py-4">
+                        <div className="text-xs font-mono text-gray-700">
+                          {item.skus.length === 1 ? (
+                            item.skus[0]
+                          ) : (
+                            <div>
+                              <span>{item.skus[0]}</span>
+                              {item.skus.length > 1 && (
+                                <span className="text-gray-500" title={item.skus.join(', ')}> +{item.skus.length - 1} more</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
                           <div>Available: {item.available_quantity}</div>
                           <div className="text-xs text-gray-500">
-                            Total: {item.stock_quantity} | Reserved: {item.reserved_quantity}
+                            Total: {item.stock_quantity}
+                            {item.reserved_quantity > 0 && ` | Reserved: ${item.reserved_quantity}`}
                           </div>
                         </div>
                       </td>
@@ -590,10 +622,10 @@ export default function AdminInventory() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${(item.stock_quantity * item.price).toFixed(2)}
+                        ${item.price.toFixed(2)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(item.last_updated).toLocaleDateString()}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${(item.stock_quantity * item.price).toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-2">
@@ -603,8 +635,18 @@ export default function AdminInventory() {
                               setShowAdjustModal(true);
                             }}
                             className="text-blue-600 hover:text-blue-900"
+                            title="Adjust stock"
                           >
                             <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              console.log('View details for:', item);
+                            }}
+                            className="text-gray-600 hover:text-gray-900"
+                            title="View details"
+                          >
+                            <Eye className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -625,17 +667,20 @@ export default function AdminInventory() {
         {/* Stock Adjustment Modal */}
         {showAdjustModal && selectedItem && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
               <div className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Adjust Stock by Size</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Adjust Stock</h2>
 
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm font-medium text-gray-700">{selectedItem.product_name}</p>
                     <p className="text-xs text-gray-500">
-                      {selectedItem.size_display} • SKU: {selectedItem.sku}
+                      {selectedItem.size_display} • {selectedItem.colorway || 'Default'}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">Current Stock: {selectedItem.stock_quantity}</p>
+                    {selectedItem.skus.length > 1 && (
+                      <p className="text-xs text-gray-500 mt-1">SKUs: {selectedItem.skus.join(', ')}</p>
+                    )}
                   </div>
 
                   <div>

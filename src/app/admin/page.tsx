@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import OrderManagement from '@/components/admin/OrderManagement';
 import ProductApproval from '@/components/admin/ProductApproval';
-import StockManagementDashboard from '@/components/admin/StockManagementDashboard';
+import EnhancedInventoryManagement from '@/components/admin/EnhancedInventoryManagement';
 
 interface DashboardStats {
   totalRevenue: number;
@@ -75,6 +75,8 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const checkAdmin = async () => {
+      console.log('🔍 Admin page: Starting authentication check...');
+
       // Check URL params or local session for admin bypass (for testing)
       const urlParams = new URLSearchParams(window.location.search);
       const isTestAdmin = urlParams.get('admin') === 'test' ||
@@ -88,23 +90,43 @@ export default function AdminDashboard() {
         return;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 Admin page: Checking user authentication...');
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      console.log('🔐 Auth check result:', {
+        hasUser: !!user,
+        userId: user?.id,
+        userEmail: user?.email,
+        authError: authError?.message
+      });
+
       if (!user) {
+        console.log('❌ Admin page: No user found, access denied');
         setError('Please sign in to access admin dashboard');
         setLoading(false);
         return;
       }
 
-      const { data: profile } = await supabase
+      console.log('📋 Admin page: Fetching user profile...');
+      const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('role, email')
         .eq('id', user.id)
         .single();
 
+      console.log('👥 Profile check result:', {
+        profile,
+        profileError: profileError?.message,
+        hasRole: !!profile?.role,
+        isAdmin: profile?.role === 'admin'
+      });
+
       if (profile?.role === 'admin' || profile?.email?.includes('admin')) {
+        console.log('✅ Admin access granted! Role:', profile?.role);
         setIsAdmin(true);
         await loadDashboardData();
       } else {
+        console.log('❌ Admin access denied. User role:', profile?.role, 'Email:', profile?.email);
         setError('Access denied. Admin privileges required.');
         setLoading(false);
       }
@@ -545,61 +567,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <Link
-              href="/admin/orders"
-              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-            >
-              <ShoppingCart className="w-8 h-8 text-blue-600 mb-2" />
-              <span className="text-sm font-medium text-gray-900">Manage Orders</span>
-            </Link>
-
-            <Link
-              href="/admin/products"
-              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
-            >
-              <Package className="w-8 h-8 text-green-600 mb-2" />
-              <span className="text-sm font-medium text-gray-900">Products</span>
-            </Link>
-
-            <Link
-              href="/admin/customers"
-              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
-            >
-              <Users className="w-8 h-8 text-purple-600 mb-2" />
-              <span className="text-sm font-medium text-gray-900">Customers</span>
-            </Link>
-
-            <Link
-              href="/admin/analytics"
-              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
-            >
-              <BarChart3 className="w-8 h-8 text-indigo-600 mb-2" />
-              <span className="text-sm font-medium text-gray-900">Analytics</span>
-            </Link>
-
-            <Link
-              href="/admin/inventory"
-              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors"
-            >
-              <Database className="w-8 h-8 text-orange-600 mb-2" />
-              <span className="text-sm font-medium text-gray-900">Inventory</span>
-            </Link>
-
-            <Link
-              href="/admin/reports"
-              className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
-            >
-              <FileText className="w-8 h-8 text-gray-600 mb-2" />
-              <span className="text-sm font-medium text-gray-900">Reports</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
+{/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* Recent Orders */}
@@ -720,7 +688,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'inventory' && (
-          <StockManagementDashboard />
+          <EnhancedInventoryManagement />
         )}
       </div>
     </div>

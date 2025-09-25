@@ -55,54 +55,64 @@ export default function LoginPage() {
         return;
       }
 
-      // Use server-side login API to bypass CORS issues
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      // Use client-side authentication to maintain session
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
 
-      const result = await response.json();
-
-      console.log('📈 Server auth response:', {
-        success: result.success,
-        hasUser: !!result.user,
-        hasProfile: !!result.profile,
-        error: result.error
+      console.log('📈 Client auth response:', {
+        hasUser: !!data.user,
+        hasSession: !!data.session,
+        error: error?.message
       });
 
-      if (!result.success) {
-        console.error('❌ Authentication failed:', result.error);
-        setError(result.error);
+      if (error) {
+        console.error('❌ Authentication failed:', error.message);
+        setError(error.message);
         return;
       }
 
-      if (result.user && result.profile) {
-        console.log(`🔀 User role detected: ${result.profile.role}`);
+      if (data.user && data.session) {
+        console.log('✅ Login successful, fetching user profile...');
 
-        // Redirect based on role
-        switch (result.profile.role) {
-          case 'admin':
-            console.log('👑 Redirecting to admin dashboard...');
-            router.push('/admin');
-            break;
-          case 'vendeur':
-            console.log('🏪 Redirecting to vendor dashboard...');
-            router.push('/vendor');
-            break;
-          default:
-            console.log('🏠 Redirecting to homepage (default)...');
-            router.push('/');
-            break;
+        // Get user role from database
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('role, full_name')
+          .eq('id', data.user.id)
+          .single();
+
+        console.log('👤 User data:', { userData, error: userError?.message });
+
+        if (userData) {
+          console.log(`🔀 User role detected: ${userData.role}`);
+
+          // Redirect based on role
+          switch (userData.role) {
+            case 'admin':
+              console.log('👑 Redirecting to admin dashboard...');
+              router.push('/admin');
+              break;
+            case 'vendeur':
+              console.log('🏪 Redirecting to vendor dashboard...');
+              router.push('/vendor');
+              break;
+            default:
+              console.log('🏠 Redirecting to homepage (default)...');
+              router.push('/');
+              break;
+          }
+        } else {
+          console.log('⚠️ No user profile found, redirecting to homepage...');
+          router.push('/');
         }
       } else {
-        console.log('⚠️ No user data found, redirecting to homepage...');
-        router.push('/');
+        console.log('⚠️ No session created, login failed');
+        setError('Login failed. Please try again.');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('💥 Login error:', error);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
